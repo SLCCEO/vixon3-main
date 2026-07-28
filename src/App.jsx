@@ -47,10 +47,10 @@ const apiKey = getApiKey();
 const buildLocalFallback = (prompt, reason = "The neural link is currently unavailable.") => {
   const trimmedPrompt = (prompt || "").trim();
   const preview = trimmedPrompt
-    ? ` Request received: "${trimmedPrompt.slice(0, 90)}${trimmedPrompt.length > 90 ? '...' : ''}"`
+    ? ` You asked: "${trimmedPrompt.slice(0, 90)}${trimmedPrompt.length > 90 ? '...' : ''}"`
     : "";
 
-  return `NEURAL_LINK_STANDBY. ${reason}${preview}`;
+  return `VEXON_CORE // LOCAL PROTOCOL ACTIVE. ${reason}${preview} I’m operating in offline mode, but I’m still here.`;
 };
 
 async function callGemini(prompt, systemInstruction = "") {
