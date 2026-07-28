@@ -44,10 +44,19 @@ const getApiKey = () => {
 
 const apiKey = getApiKey();
 
+const buildLocalFallback = (prompt, reason = "The neural link is currently unavailable.") => {
+  const trimmedPrompt = (prompt || "").trim();
+  const preview = trimmedPrompt
+    ? ` Request received: "${trimmedPrompt.slice(0, 90)}${trimmedPrompt.length > 90 ? '...' : ''}"`
+    : "";
+
+  return `NEURAL_LINK_STANDBY. ${reason}${preview}`;
+};
+
 async function callGemini(prompt, systemInstruction = "") {
   if (!apiKey) {
-    console.error("Gemini API key missing");
-    return "ERROR: NEURAL_LINK_OFFLINE.";
+    console.warn("Gemini API key missing. Using local fallback response.");
+    return buildLocalFallback(prompt, "The neural link is currently unavailable, but local protocol mode is active.");
   }
 
   const models = [
@@ -109,7 +118,7 @@ async function callGemini(prompt, systemInstruction = "") {
     }
   }
 
-  return lastError;
+  return buildLocalFallback(prompt, `The uplink failed: ${lastError}`);
 }
 
 // --- Components ---
