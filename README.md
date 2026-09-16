@@ -38,6 +38,8 @@ The `/streamers` page requests `/api/twitch`. Configure these server-side Vercel
 TWITCH_CLIENT_ID=your-twitch-client-id
 TWITCH_CLIENT_SECRET=your-twitch-client-secret
 TWITCH_ACCESS_TOKEN=your-broadcaster-user-access-token
+
+To authorize the Twitch follower token, register `https://www.vixon.online/api/twitch-callback` as the OAuth redirect URL, then open `https://www.vixon.online/api/twitch-login`.
 ```
 
 The Twitch client secret and access token must never use a `VITE_` prefix because they must not be sent to the browser. Create `TWITCH_ACCESS_TOKEN` by authorizing the Vexon Twitch account with the `moderator:read:followers` scope. The endpoint uses the app token for profiles and the broadcaster user token for follower totals. Without the user token or required scope, profiles still load but follower totals show `Followers unavailable`.

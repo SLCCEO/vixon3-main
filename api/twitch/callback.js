@@ -17,13 +17,16 @@ const exchangeCode = async (code) => {
 };
 
 export default async function handler(request, response) {
-  const { code, error, error_description: errorDescription } = request.query || {};
+  const query = new URL(request.url, 'https://www.vixon.online').searchParams;
+  const code = query.get('code');
+  const error = query.get('error');
+  const errorDescription = query.get('error_description');
 
   if (error) {
     return response.status(400).send(`Twitch authorization failed: ${errorDescription || error}`);
   }
   if (!code) {
-    return response.status(400).send('Missing Twitch authorization code.');
+    return response.status(400).send('Missing Twitch authorization code. Start the flow at https://www.vixon.online/api/twitch/login and do not open the callback URL directly.');
   }
   if (!process.env.TWITCH_CLIENT_ID || !process.env.TWITCH_CLIENT_SECRET) {
     return response.status(503).send('Twitch API credentials are not configured on Vercel.');
