@@ -1,4 +1,5 @@
 const streamerLogins = [
+  'vexoncore',
   'ladychaosvtuber',
   'chloepanzer',
   'skylord2098',
@@ -18,22 +19,30 @@ const getTwitchToken = async () => {
   return data.access_token;
 };
 
-const fetchTwitchData = async (token) => {
-  const headers = {
-    Authorization: `Bearer ${token}`,
+const fetchTwitchData = async (appToken) => {
+  const profileHeaders = {
+    Authorization: `Bearer ${appToken}`,
     'Client-Id': process.env.TWITCH_CLIENT_ID,
   };
   const usersQuery = streamerLogins.map((login) => `login=${encodeURIComponent(login)}`).join('&');
-  const usersResponse = await fetch(`https://api.twitch.tv/helix/users?${usersQuery}`, { headers });
+  const usersResponse = await fetch(`https://api.twitch.tv/helix/users?${usersQuery}`, { headers: profileHeaders });
   if (!usersResponse.ok) throw new Error('Twitch profile lookup failed');
   const users = (await usersResponse.json()).data || [];
 
   return Promise.all(users.map(async (user) => {
-    const followersResponse = await fetch(
-      `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${encodeURIComponent(user.id)}`,
-      { headers },
-    );
-    const followersData = followersResponse.ok ? await followersResponse.json() : {};
+    let followersData = {};
+    if (process.env.TWITCH_ACCESS_TOKEN) {
+      const followersResponse = await fetch(
+        `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${encodeURIComponent(user.id)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.TWITCH_ACCESS_TOKEN}`,
+            'Client-Id': process.env.TWITCH_CLIENT_ID,
+          },
+        },
+      );
+      followersData = followersResponse.ok ? await followersResponse.json() : {};
+    }
     return {
       login: user.login,
       displayName: user.display_name,
