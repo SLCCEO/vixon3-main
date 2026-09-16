@@ -32,7 +32,7 @@ Without the token configured, the page shows that Patreon API setup is required 
 
 Source-code tier
 
-The source-code access tier is **The System Architect**. Join the tier through the [VexonStudio Patreon membership page](https://www.patreon.com/cw/VexonStudios/membership). After the qualifying payment is verified, Jeremiah_YT or VexonStudio staff will provide the authorized source-code access and related installation information. Source-code access is not a public or unrestricted download and remains subject to the terms below.
+The source-code access tier is **The System Architect**. Join the tier through the [VexonStudio Patreon membership page](https://www.patreon.com/cw/VexonStudios/membership). After the qualifying payment is verified, Jeremiah_YT or VexonStudio staff will provide the authorized source-code access and related installation information. Source-code access is not a public or unrestricted download and remains subject to the terms below. make an ticket in our Discord server.
 
 Twitch streamer data
 
