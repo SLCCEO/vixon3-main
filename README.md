@@ -14,6 +14,47 @@ Live Example: https://vixon3.vercel.app
 
 Developer Portfolio: https://jeremiah-portfolio-mu.vercel.app
 
+Patreon supporter feed
+
+The `/patreon` page requests the server-side `/api/patreon` endpoint, which discovers the creator campaign, fetches active memberships, follows pagination, and lists patrons with a returned name. Configure this Vercel environment variable:
+
+```text
+PATREON_ACCESS_TOKEN=your-patreon-creator-access-token
+```
+
+The token must have permission to read the creator's campaigns and members. Keep the Patreon access token on the server; do not expose it in a `VITE_` variable or browser code. `VITE_PATREON_MEMBERS_URL` is still supported as an optional override for an existing server-side feed that returns either an array or `{ "members": [] }` with this shape:
+
+```json
+[{ "name": "Display name", "tier": "Supporter" }]
+```
+
+Without the token configured, the page shows that Patreon API setup is required and does not display placeholder names.
+
+Twitch streamer data
+
+The `/streamers` page requests `/api/twitch`. Configure these server-side Vercel environment variables before deployment:
+
+```text
+TWITCH_CLIENT_ID=your-twitch-client-id
+TWITCH_CLIENT_SECRET=your-twitch-client-secret
+```
+
+The Twitch client secret must never use a `VITE_` prefix because it must not be sent to the browser. The endpoint loads Twitch profile data and attempts to load follower totals. Twitch may require a broadcaster or moderator-authorized user token for follower totals; when that authorization is unavailable, the page keeps the channel link and shows `Followers unavailable`.
+
+Homepage social statistics
+
+The homepage dashboard requests `/api/social-stats` for YouTube subscribers, TikTok followers, and Discord members. Configure these server-side Vercel environment variables:
+
+```text
+YOUTUBE_API_KEY=your-youtube-data-api-key
+YOUTUBE_CHANNEL_ID=your-youtube-channel-id
+TIKTOK_ACCESS_TOKEN=your-tiktok-user-access-token
+DISCORD_BOT_TOKEN=your-discord-bot-token
+DISCORD_GUILD_ID=your-discord-server-id
+```
+
+Enable the YouTube Data API v3 for the Google key. Authorize the TikTok account through Login Kit with both `user.info.basic` and `user.info.stats`; the latter provides follower, following, likes, and video counts. The token must belong to the account whose follower count should be displayed. Invite the Discord bot to the server and enable the Server Members Intent if your bot setup requires it. Missing or unauthorized services return `null` for that card while the other counts continue loading.
+
 Terms of Service (TOS)
 
 By accessing this project, you agree to the following legally binding terms:

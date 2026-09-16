@@ -32,7 +32,11 @@ import {
   Users2,
   CalendarDays,
   Store,
-  BadgeCheck
+  BadgeCheck,
+  ExternalLink,
+  Crown,
+  UserRound,
+  LockKeyhole
 } from 'lucide-react';
 
 // --- Gemini API Logic ---
@@ -262,12 +266,24 @@ const DossierSection = () => {
 const Navbar = ({ currentPath, onNavigate }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const logoClicks = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogoClick = () => {
+    logoClicks.current += 1;
+    if (logoClicks.current >= 5) {
+      logoClicks.current = 0;
+      onNavigate('/neural-override');
+    }
+    window.setTimeout(() => {
+      logoClicks.current = 0;
+    }, 1400);
+  };
 
   const handleNavClick = (e, target) => {
     if (target.startsWith('#')) {
@@ -298,6 +314,8 @@ const Navbar = ({ currentPath, onNavigate }) => {
     { name: 'Lore', href: '/lore' },
     { name: 'Streamers', href: '/streamers' },
     { name: 'Partners', href: '/partnerships' },
+    { name: 'Staff', href: '/staff' },
+    { name: 'Patreon', href: '/patreon' },
     { name: 'Archives', href: '#archives' },
     { name: 'Contact', href: '#contact' }
   ];
@@ -308,11 +326,13 @@ const Navbar = ({ currentPath, onNavigate }) => {
         <motion.div 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
+          onClick={handleLogoClick}
+          role="button"
+          tabIndex={0}
+          title="VEXON_SYS"
           className="text-2xl font-black tracking-tighter text-red-500 italic flex items-center gap-2"
         >
-          <div className="w-8 h-8 border-2 border-red-600 rounded-sm rotate-45 flex items-center justify-center">
-            <div className="w-4 h-4 bg-red-600 rounded-full animate-pulse"></div>
-          </div>
+          <img src="/vexon-logo.png" alt="Vexon Studios" className="h-9 w-9 object-cover mix-blend-multiply" />
           VEXON_SYS
         </motion.div>
 
@@ -405,6 +425,116 @@ const StatCard = ({ icon: Icon, label, value }) => (
   </motion.div>
 );
 
+const NeuralOverridePage = ({ onNavigate }) => {
+  const [phase, setPhase] = useState('login');
+  const [downloadProgress, setDownloadProgress] = useState(0);
+
+  useEffect(() => {
+    const hackTimer = window.setTimeout(() => setPhase('hack'), 4000);
+    const loreTimer = window.setTimeout(() => setPhase('lore'), 9000);
+    return () => {
+      window.clearTimeout(hackTimer);
+      window.clearTimeout(loreTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (phase !== 'hack') return undefined;
+    const downloadTimer = window.setInterval(() => {
+      setDownloadProgress((progress) => Math.min(progress + 5, 100));
+    }, 240);
+    return () => window.clearInterval(downloadTimer);
+  }, [phase]);
+
+  return (
+    <div className="min-h-screen bg-black px-6 py-24 text-gray-200">
+      <div className="mx-auto max-w-5xl">
+        {phase === 'login' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto max-w-md border border-red-600/50 bg-[#0d0707] p-8 shadow-[0_0_40px_rgba(220,38,38,0.2)]">
+            <div className="mb-8 flex items-center justify-between border-b border-red-600/20 pb-4 text-[10px] font-black uppercase tracking-[0.25em] text-red-500">
+              <span>Aegis Corporation</span><span>Secure Login</span>
+            </div>
+            <div className="mb-8 text-center">
+              <img src="/vexon-logo.png" alt="Vexon Studios" className="mx-auto mb-5 h-28 w-28 object-cover mix-blend-multiply" />
+              <h1 className="text-2xl font-black uppercase italic text-white">Aegis Network</h1>
+              <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-gray-500">Authorized personnel only</p>
+            </div>
+            <div className="space-y-3 text-xs">
+              <div className="border border-gray-800 bg-black p-3 text-gray-500">USER_ID: V-01</div>
+              <div className="border border-gray-800 bg-black p-3 text-gray-500">ACCESS_KEY: ************</div>
+              <div className="flex items-center gap-2 border border-red-600/30 bg-red-600/10 p-3 text-red-400"><Loader2 size={14} className="animate-spin" /> Verifying neural signature...</div>
+            </div>
+          </motion.div>
+        )}
+
+        {phase === 'hack' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border border-red-600 bg-[#080404] p-8 shadow-[0_0_50px_rgba(220,38,38,0.25)]">
+            <div className="mb-6 flex items-center justify-between gap-3 border-b border-red-600/30 pb-4 text-red-500"><div className="flex items-center gap-3"><Terminal size={20} /><span className="text-xs font-black uppercase tracking-[0.3em]">NEURAL_LINK OVERRIDE</span></div><span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Packet {String(Math.min(downloadProgress + 1, 100)).padStart(3, '0')}</span></div>
+            <div className="space-y-3 text-sm leading-7 text-red-400">
+              {['AEGIS_AUTHORITY: REJECTED', 'V-01_SIGNATURE: RECOGNIZED', 'SECURITY_BULKHEADS: BREACHED'].map((message, index) => (
+                <motion.p key={message} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.18 }}>&gt; {message}</motion.p>
+              ))}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }} className="border border-red-600/30 bg-red-600/5 p-4">
+                <div className="mb-2 flex items-center justify-between gap-4 text-[10px] font-black uppercase tracking-[0.18em] text-white"><span>Downloading: aegis_lore.pkg</span><span>{Math.min(downloadProgress, 100)}%</span></div>
+                <div className="mb-3 flex h-3 gap-1 overflow-hidden bg-red-950 p-0.5">{Array.from({ length: 16 }, (_, index) => <motion.span key={index} animate={{ opacity: downloadProgress >= (index + 1) * 6.25 ? 1 : 0.25 }} className="h-full flex-1 bg-red-600" />)}</div>
+                <div className="flex flex-wrap justify-between gap-2 text-[10px] uppercase tracking-[0.16em] text-red-300"><span>{Math.floor(512 + downloadProgress * 42.4)} KB / 4.76 MB</span><span>CRC: {downloadProgress > 70 ? '7A-04-OK' : 'CHECKING'}</span></div>
+              </motion.div>
+              <p className="animate-pulse text-white">&gt; DECODING CLASSIFIED LORE...</p>
+            </div>
+          </motion.div>
+        )}
+
+        {phase === 'lore' && (
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="border border-red-600/40 bg-[#0d0707] p-8 shadow-[0_0_40px_rgba(220,38,38,0.15)] md:p-12">
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-red-600/20 pb-5"><div><div className="mb-2 text-[10px] font-black uppercase tracking-[0.35em] text-red-500">Recovered File // AEGIS-04</div><h1 className="text-4xl font-black uppercase italic text-white">The Override</h1></div><span className="border border-red-600/40 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-red-400">Classified</span></div>
+            <div className="space-y-6 text-sm leading-7 text-gray-300">
+              <p>Deep beneath the fractured world, the Aegis Complex was built to fuse organic biology with cybernetic warfare. In C-Wing, Unit V-01 was engineered to move through glitch-heavy neural networks and corridors with equal lethality.</p>
+              <p>Dr. Aris Thorne was the one technician who treated Vexon as more than a weapon. She introduced him to rhythm, freedom, and truth. When officials framed her for treason and cornered her in Sector 4, Vexon broke through the security bulkheads, but arrived too late.</p>
+              <p className="border-l-4 border-red-600 bg-red-600/5 p-5 text-white">The death shattered his visor and turned his love of rhythm into a violent, glitching roar. The Aegis Complex did not lose a weapon that night. It created a witness.</p>
+              <p>Now Vexon hunts liars, betrayals, and anyone who weaponizes secrets. Every stream, signal, and transmission is another breach in the system that tried to erase the truth.</p>
+            </div>
+            <button onClick={() => onNavigate('/')} className="mt-8 border border-red-600/40 bg-red-600/10 px-5 py-3 text-[10px] font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600 hover:text-white">Return to surface</button>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const PolicyPage = ({ type, onNavigate }) => {
+  const isPrivacy = type === 'privacy';
+  return (
+    <div className="min-h-screen bg-[#0a0505] px-6 pb-24 pt-32 text-gray-200">
+      <div className="mx-auto max-w-4xl">
+        <button onClick={() => onNavigate('/')} className="mb-10 border border-red-600/30 bg-black/40 px-5 py-3 text-[10px] font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/10 hover:text-white">Return Home</button>
+        <article className="border border-red-600/20 bg-[#0d0707] p-8 shadow-[0_0_30px_rgba(220,38,38,0.08)] md:p-12">
+          <div className="mb-3 text-[10px] font-black uppercase tracking-[0.35em] text-red-500">VEXON_SYS // Official Document</div>
+          <h1 className="mb-3 text-4xl font-black uppercase italic tracking-tight text-white">{isPrivacy ? 'Privacy Policy' : 'Terms of Service'}</h1>
+          <p className="mb-10 text-xs uppercase tracking-[0.2em] text-gray-500">Effective date: September 15, 2026</p>
+          {isPrivacy ? (
+            <div className="space-y-7 text-sm leading-7 text-gray-300">
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Information we collect</h2><p>VEXON may receive information you voluntarily provide through contact forms or service integrations. The website may also receive public statistics from Twitch, YouTube, TikTok, Discord, and Patreon through their official APIs.</p></section>
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">How information is used</h2><p>Information is used to operate the website, display public creator and community statistics, respond to inquiries, support creator partnerships, and maintain site security. We do not sell personal information.</p></section>
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Platform integrations</h2><p>Twitch data is used for streamer profiles, channel links, live embeds, and follower totals. YouTube data is used to display the official channel subscriber count. TikTok data is used to display the official account follower count. Discord data is used to display an approximate server member count. Patreon data is used to display active supporter names when the creator feed is authorized. These integrations are read-only and only return the information needed for the website feature.</p></section>
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Third-party links</h2><p>Links may connect to Twitch, YouTube, TikTok, Discord, Patreon, Dubby, X, Instagram, and other third-party services. Dubby links may use referral tracking for the VexonCore discount partnership. Their own privacy policies and terms apply when you use those services.</p></section>
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Data security and retention</h2><p>API credentials are stored server-side and are not intentionally exposed in the browser. Information is retained only as needed to operate the website, provide requested services, and meet legal obligations.</p></section>
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Contact</h2><p>For privacy questions, contact <a className="text-red-400 hover:text-white" href="mailto:contact@vixon.online">contact@vixon.online</a>.</p></section>
+            </div>
+          ) : (
+            <div className="space-y-7 text-sm leading-7 text-gray-300">
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Use of the website</h2><p>VEXON provides creator, streaming, technology, partnership, and community content. You agree to use this website lawfully and respectfully.</p></section>
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Content and ownership</h2><p>Unless otherwise noted, VEXON branding, original writing, software, graphics, videos, and other site content belong to VEXON or its licensors. Do not copy, redistribute, or commercially use site content without permission.</p></section>
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Connected services</h2><p>The website may connect to Twitch, YouTube, TikTok, Discord, Patreon, Dubby, X, and Instagram for channel links, live content, public statistics, supporter information, community access, and partner offers. These services are operated by separate companies and have their own terms and policies.</p></section>
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Disclaimer</h2><p>The website and its content are provided for informational and entertainment purposes. Features may change or become unavailable without notice.</p></section>
+              <section><h2 className="mb-2 text-xl font-black uppercase text-white">Contact</h2><p>For business or legal questions, contact <a className="text-red-400 hover:text-white" href="mailto:contact@vixon.online">contact@vixon.online</a>.</p></section>
+            </div>
+          )}
+        </article>
+      </div>
+    </div>
+  );
+};
+
 const LorePage = ({ onNavigate }) => (
   <div className="pt-32 pb-24">
     <section className="py-20 border-b border-red-600/10 bg-[radial-gradient(circle_at_top,_rgba(220,38,38,0.16),_transparent_60%)]">
@@ -481,7 +611,33 @@ const LorePage = ({ onNavigate }) => (
   </div>
 );
 
-const StreamersPage = ({ onNavigate }) => (
+const streamerProfiles = [
+  { name: 'Lady Chaos', login: 'ladychaosvtuber', platform: 'Streamer', handle: '@ladychaosvtuber', bio: 'Embracing chaos as a variety streamer deity, I delve into any game or stream that piques my interest. Often found exploring the spooky realms with Dixper by my side, I also enjoy the occasional cozy game stream. Join me for a whirlwind of gaming adventures!', url: 'https://www.twitch.tv/ladychaosvtuber/about' },
+  { name: 'Chloë Panzer', login: 'chloepanzer', platform: 'Streamer', handle: '@chloepanzer', bio: "Hey, lovelies. I'm Chloë (umlaut optional), a little cat who loves weapons and military vehicles.", url: 'https://www.twitch.tv/chloepanzer' },
+  { name: 'Skylord3098', login: 'skylord2098', platform: 'Streamer', handle: '@skylord2098', bio: "Hey I'm Skylord, your Texan timelord. I stream on Twitch every Friday and Saturday at 7:00pm CST.", url: 'https://www.twitch.tv/skylord2098' },
+  { name: 'Zephie', login: 'deelexic', platform: 'Streamer', handle: '@deelexic', bio: 'Hi, I\'m Zephie, and I\'m a beginner vtuber! I\'m a variety streamer who enjoys community interaction. I have two requests for you: please be kind to me and other viewers, and have fun! Thanks!♡', url: 'https://www.twitch.tv/deelexic' },
+  { name: 'duhgobby', login: 'duhgobby', platform: 'Streamer', handle: '@duhgobby', bio: 'Just a damn goblin playing dumb games.', url: 'https://www.twitch.tv/duhgobby' },
+  { name: 'deelexic', login: 'deelexic', platform: 'Streamer', handle: '@deelexic', bio: "Heya! I'm Dee Lex (ic is silent lol). I sometimes chat, very chill and laidback streams. Stay for a fun time not a long time ;3", url: 'https://www.twitch.tv/deelexic' },
+];
+
+const StreamersPage = ({ onNavigate }) => {
+  const [twitchProfiles, setTwitchProfiles] = useState({});
+  const [twitchStatus, setTwitchStatus] = useState('Syncing Twitch data');
+
+  useEffect(() => {
+    fetch('/api/twitch')
+      .then((response) => {
+        if (!response.ok) throw new Error('Twitch data unavailable');
+        return response.json();
+      })
+      .then(({ streamers = [] }) => {
+        setTwitchProfiles(Object.fromEntries(streamers.map((streamer) => [streamer.login, streamer])));
+        setTwitchStatus('Twitch data synced');
+      })
+      .catch(() => setTwitchStatus('Twitch API setup required'));
+  }, []);
+
+  return (
   <div className="pt-32 pb-24">
     <section className="py-20 border-b border-red-600/10 bg-[radial-gradient(circle_at_top,_rgba(220,38,38,0.16),_transparent_60%)]">
       <div className="container mx-auto px-6">
@@ -499,22 +655,30 @@ const StreamersPage = ({ onNavigate }) => (
           <div className="mb-6 flex items-center gap-3">
             <Users2 className="text-red-500" size={20} />
             <h2 className="text-2xl font-black uppercase italic text-white">Streamer Dedication</h2>
+            <span className="ml-auto text-right text-[9px] font-black uppercase tracking-[0.15em] text-red-400">{twitchStatus}</span>
           </div>
-          <div className="rounded border border-red-600/20 bg-gradient-to-br from-red-600/10 to-black/30 p-6">
-            <div className="mb-3 flex items-center gap-2 text-red-400">
-              <Sparkles size={18} />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Coming Soon</span>
-            </div>
-            <h3 className="mb-3 text-2xl font-black uppercase italic text-white">Dedicated to the streamers building with me</h3>
-            <p className="max-w-3xl text-sm leading-7 text-gray-300">
-              This section will be filled with featured creators and collaborators once I have their approval to showcase them on the site. For now, it remains a dedicated placeholder space for future partnerships.
-            </p>
+          <div className="grid gap-4 md:grid-cols-3">
+            {streamerProfiles.map((streamer, index) => {
+              const twitchProfile = twitchProfiles[streamer.login];
+              return (
+              <article key={`${streamer.name}-${index}`} className="group border border-red-600/20 bg-gradient-to-br from-red-600/10 to-black/30 p-6 transition hover:-translate-y-1 hover:border-red-500/60">
+                <div className="mb-8 flex items-start justify-between"><div className="flex h-12 w-12 items-center justify-center overflow-hidden border border-red-600/40 bg-black/40 text-red-400">{twitchProfile?.profileImageUrl ? <img src={twitchProfile.profileImageUrl} alt="" className="h-full w-full object-cover" /> : <Users2 size={20} />}</div><span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">0{index + 1}</span></div>
+                <div className="mb-2 text-[10px] font-black uppercase tracking-[0.25em] text-red-400">{streamer.platform}</div>
+                <h3 className="mb-2 text-xl font-black uppercase italic text-white">{streamer.name}</h3>
+                <p className="mb-6 text-xs text-gray-500">{streamer.handle}</p>
+                <p className="mb-6 min-h-10 text-sm leading-6 text-gray-300">{streamer.bio}</p>
+                <div className="mb-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-red-400"><Twitch size={14} /> {twitchProfile?.followers === null || twitchProfile?.followers === undefined ? 'Followers unavailable' : `${toCompactNumber(twitchProfile.followers)} followers`}</div>
+                <a href={streamer.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 transition group-hover:text-white">View Twitch channel <ExternalLink size={14} /></a>
+              </article>
+              );
+            })}
           </div>
         </div>
       </div>
     </section>
   </div>
-);
+  );
+};
 
 const PartnershipsPage = ({ dubbyLink, dubbyCouponCode, onNavigate }) => (
   <div className="pt-32 pb-24">
@@ -546,7 +710,7 @@ const PartnershipsPage = ({ dubbyLink, dubbyCouponCode, onNavigate }) => (
               </div>
               <h3 className="mb-2 text-2xl font-black uppercase italic text-white">Dubby Brand • Collab Series</h3>
               <p className="text-sm leading-7 text-gray-300">
-                High-voltage stream moments, limited drops, and creator-led activations built around the same neon-edge energy as VEXON.
+                High-voltage stream moments, limited drops, and creator-led activations built around the same neon-edge energy as VEXON. Use my Discount Code for 10% OFF any Product for Dubby: VexonCore.
               </p>
               <div className="mt-5 flex flex-wrap gap-4">
                 <a href={dubbyLink} target="_blank" rel="noreferrer" className="rounded border border-red-600/30 bg-red-600/10 px-4 py-3 text-sm font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/20 hover:text-white">
@@ -576,9 +740,37 @@ const PartnershipsPage = ({ dubbyLink, dubbyCouponCode, onNavigate }) => (
                 <Sparkles size={18} />
                 <span className="text-[10px] font-black uppercase tracking-[0.3em]">Partner Pitch</span>
               </div>
-              <p className="text-sm leading-7 text-gray-300">
-                VEXON is built for premium creator-first experiences, sharp visuals, and conversation-driven audience growth. Partners get an identity designed for modern streaming culture.
+              <h2 className="mb-4 text-3xl font-black uppercase italic text-white">Partner with VEXON</h2>
+              <p className="mb-4 text-sm leading-7 text-gray-300">
+                VEXON is a tech-driven VTuber, web developer, IT specialist, and game developer delivering high-octane broadcasts, sharp visuals, and an active, hyper-engaged Twitch audience. Powered by a dedicated staff team, VEXON blends interactive gaming, technology, and custom digital builds into a unique live experience.
               </p>
+              <p className="mb-6 text-sm leading-7 text-gray-300">
+                Whether you are a tech brand, software provider, hardware manufacturer, or fellow creator, partnering with VEXON puts your product in front of a smart, tech-savvy, and interactive community.
+              </p>
+
+              <h3 className="mb-3 text-sm font-black uppercase tracking-[0.2em] text-red-400">Why work with VEXON?</h3>
+              <div className="space-y-3 text-sm leading-6 text-gray-300">
+                <div><strong className="text-white">Tech &amp; Dev Ecosystem</strong><br />As an active developer and IT specialist, VEXON speaks the language of tech natively. Audience integrations feel authentic, informed, and genuinely engaging.</div>
+                <div><strong className="text-white">Dedicated Production &amp; Staff Support</strong><br />Work with an organized, staff-backed pipeline built around clear communication, structured execution, and reliable sponsored delivery.</div>
+                <div><strong className="text-white">Hyper-Interactive Audience</strong><br />Streams thrive on real-time conversation, technical discussion, and direct audience interaction that drives clicks and community participation.</div>
+                <div><strong className="text-white">Custom Stream Integrations</strong><br />Custom web widgets, live overlays, and tailored hardware or software showcases are built cleanly into the broadcast setup.</div>
+              </div>
+
+              <h3 className="mb-3 mt-6 text-sm font-black uppercase tracking-[0.2em] text-red-400">Partnership opportunities</h3>
+              <div className="space-y-3 text-sm leading-6 text-gray-300">
+                <div><strong className="text-white">Hardware &amp; Tech Sponsorships</strong><br />PC component showcases, peripherals, software tool reviews, and live tech setups or breakdowns.</div>
+                <div><strong className="text-white">Gaming &amp; Indie Showcases</strong><br />Playtests, sponsored game streams, community play sessions, and event co-hosting.</div>
+                <div><strong className="text-white">Collabs &amp; Creator Crossovers</strong><br />Multi-streamer events, custom stream tools, web projects, and high-energy group broadcasts.</div>
+              </div>
+
+              <div className="mt-6 border-t border-red-600/20 pt-5">
+                <h3 className="mb-2 text-xl font-black uppercase italic text-white">Ready to plug in?</h3>
+                <p className="mb-4 text-sm leading-6 text-gray-300">Let&apos;s create something distinct. Reach out to request a media kit or pitch a custom collaboration.</p>
+                <div className="flex flex-wrap gap-3">
+                  <a href="https://www.twitch.tv/vexoncore" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded border border-red-600/30 bg-red-600/10 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 transition hover:bg-red-600/20 hover:text-white"><Twitch size={14} /> Twitch</a>
+                  <a href="mailto:contact@vixon.online?subject=VEXON%20partnership%20inquiry" className="inline-flex items-center gap-2 rounded border border-red-600/30 bg-red-600/10 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 transition hover:bg-red-600/20 hover:text-white"><Mail size={14} /> Business inquiries</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -587,6 +779,59 @@ const PartnershipsPage = ({ dubbyLink, dubbyCouponCode, onNavigate }) => (
   </div>
 );
 
+const StaffPage = ({ onNavigate }) => {
+  const staff = [
+    { role: 'Brand Founder / Chief Executive Officer', name: 'VexonCore', detail: 'Brand vision, executive direction, and creator leadership.' },
+    { role: 'Brand Manager in Training / Chief Content Officer', name: 'Testing10325', detail: 'Brand development, content strategy, and staff leadership.' },
+    { role: 'Admin', name: 'Shadow', detail: 'Community administration and support.' },
+    { role: 'Mod', name: 'A Random User', detail: 'Community moderation and support.' },
+    { role: 'Mod', name: 'Killer I', detail: 'Community moderation and support.' },
+    { role: 'T Mod', name: 'gisellehrndz', detail: 'Community moderation and support.' },
+  ];
+
+  return (
+    <div className="pt-32 pb-24">
+      <section className="py-20 border-b border-red-600/10 bg-[radial-gradient(circle_at_top,_rgba(220,38,38,0.16),_transparent_60%)]">
+        <div className="container mx-auto px-6">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
+            <div><div className="mb-3 text-[10px] font-black uppercase tracking-[0.35em] text-red-500">Operations Deck</div><h1 className="text-5xl font-black uppercase italic tracking-tighter text-white">Staff_Page</h1></div>
+            <button onClick={() => onNavigate('/')} className="rounded border border-red-600/30 bg-black/40 px-5 py-3 text-[10px] font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/10 hover:text-white">Return Home</button>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {staff.map((member) => <article key={member.role} className="border border-red-600/20 bg-[#0d0707] p-7"><UserRound className="mb-8 text-red-500" size={24} /><div className="mb-2 text-[10px] font-black uppercase tracking-[0.25em] text-red-400">{member.role}</div><h2 className="mb-3 text-2xl font-black uppercase italic text-white">{member.name}</h2><p className="text-sm leading-7 text-gray-400">{member.detail}</p></article>)}
+          </div>
+          <div className="mt-8 flex items-center gap-4 border border-red-600/20 bg-black/30 p-5 text-sm text-gray-300"><Crown className="shrink-0 text-red-500" size={20} /> Staff profiles can be expanded as the team grows. <a className="font-black text-red-400 hover:text-white" href="https://discord.gg/YUYhtgXZjw" target="_blank" rel="noreferrer">Join HQ on Discord</a></div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+const PatreonPage = ({ onNavigate }) => {
+  const [members, setMembers] = useState([]);
+  const [status, setStatus] = useState('Loading supporter feed');
+
+  useEffect(() => {
+    const endpoint = import.meta.env.VITE_PATREON_MEMBERS_URL || '/api/patreon';
+    fetch(endpoint).then((response) => {
+      if (!response.ok) throw new Error('Supporter feed unavailable');
+      return response.json();
+    }).then((data) => {
+      setMembers(Array.isArray(data) ? data : data.members || []);
+      setStatus('Live supporter feed connected');
+    }).catch(() => setStatus('Patreon API setup required'));
+  }, []);
+
+  return (
+    <div className="pt-32 pb-24"><section className="py-20 border-b border-red-600/10 bg-[radial-gradient(circle_at_top,_rgba(220,38,38,0.16),_transparent_60%)]"><div className="container mx-auto px-6">
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-6"><div><div className="mb-3 text-[10px] font-black uppercase tracking-[0.35em] text-red-500">Supporter Network</div><h1 className="text-5xl font-black uppercase italic tracking-tighter text-white">Patreon_Page</h1></div><button onClick={() => onNavigate('/')} className="rounded border border-red-600/30 bg-black/40 px-5 py-3 text-[10px] font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/10 hover:text-white">Return Home</button></div>
+      <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]"><div className="border border-red-600/20 bg-[#0d0707] p-8"><LockKeyhole className="mb-8 text-red-500" size={26} /><div className="mb-3 text-[10px] font-black uppercase tracking-[0.3em] text-red-400">Supporter roll call</div><h2 className="mb-4 text-3xl font-black uppercase italic text-white">The people powering the signal</h2><p className="mb-6 text-sm leading-7 text-gray-300">Patreon supporters can appear here by name after the private Patreon sync is connected. Only display names returned by your server should be sent to this page.</p><a href="https://www.patreon.com/cw/VexonStudios" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-red-600 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-white hover:text-black">Join on Patreon <ExternalLink size={14} /></a></div>
+        <div className="border border-red-600/20 bg-[#0d0707] p-8"><div className="mb-6 flex items-center justify-between gap-4"><div className="flex items-center gap-3"><Users2 className="text-red-500" size={20} /><h2 className="text-2xl font-black uppercase italic text-white">Supporter_Names</h2></div><span className="text-right text-[9px] font-black uppercase tracking-[0.15em] text-red-400">{status}</span></div><div className="grid gap-3 sm:grid-cols-2">{members.length ? members.map((member, index) => <div key={`${member.name}-${index}`} className="border border-red-600/15 bg-black/30 p-4"><div className="text-sm font-black uppercase text-white">{member.name || 'Anonymous supporter'}</div><div className="mt-2 text-[10px] uppercase tracking-[0.2em] text-red-500">{member.tier || 'Supporter'}</div></div>) : <p className="text-sm text-gray-500">No public supporter names returned yet.</p>}</div></div>
+      </div>
+    </div></section></div>
+  );
+};
+
 export default function App() {
   const contactEmail = "contact@vixon.online";
   const twitchChannel = "vexoncore";
@@ -594,7 +839,7 @@ export default function App() {
   const dubbyCouponCode = 'VexonCore';
   const socialProfiles = {
     twitch: 'https://www.twitch.tv/vexoncore',
-    youtube: 'https://www.youtube.com/@vexoncore',
+    youtube: 'https://www.youtube.com/@VixonOfficial',
     tiktok: 'https://www.tiktok.com/@jeremiah_yt_official',
     x: 'https://x.com/VixonOfficial',
     instagram: 'https://www.instagram.com/vexonofficialvt/',
@@ -641,37 +886,20 @@ export default function App() {
   useEffect(() => {
     const fetchLiveStats = async () => {
       try {
-        const endpoints = [
-          { key: 'twitchFollowers', url: 'https://decapi.me/twitch/followcount/vexoncore' },
-          { key: 'youtubeSubscribers', url: 'https://www.googleapis.com/youtube/v3/channels?part=statistics&id=UCd_gwQ-M2H3xWjA6nLCe2fQ&key=AIzaSyD5OY8R2Xc1r9jV1P8fDbeQ0V4fA0uQdO8' },
-          { key: 'tiktokFollowers', url: 'https://www.tiktok.com/@jeremiah_yt_official' },
-        ];
-
-        const results = await Promise.allSettled(endpoints.map(async (item) => {
-          const response = await fetch(item.url, { method: 'GET' });
-          const text = await response.text();
-          return { key: item.key, text };
-        }));
-
+        const [twitchResponse, socialResponse] = await Promise.all([
+          fetch('/api/twitch'),
+          fetch('/api/social-stats'),
+        ]);
         const nextStats = { twitchFollowers: null, youtubeSubscribers: null, tiktokFollowers: null, discordMembers: null };
-
-        for (const result of results) {
-          if (result.status !== 'fulfilled') continue;
-          const { key, text } = result.value;
-
-          if (key === 'twitchFollowers') {
-            nextStats.twitchFollowers = parseCount(text);
-          } else if (key === 'youtubeSubscribers') {
-            const parsed = JSON.parse(text);
-            const count = parsed?.items?.[0]?.statistics?.subscriberCount;
-            nextStats.youtubeSubscribers = parseCount(count);
-          } else if (key === 'tiktokFollowers') {
-            const match = text.match(/followerCount\":(\d+)/i) || text.match(/followers?\D?(\d+)/i);
-            nextStats.tiktokFollowers = parseCount(match?.[1]);
-          }
+        if (twitchResponse.ok) {
+          const twitchData = await twitchResponse.json();
+          nextStats.twitchFollowers = twitchData.streamers?.find((streamer) => streamer.login === twitchChannel)?.followers ?? null;
         }
-
-        setSocialStats((prev) => ({ ...prev, ...nextStats }));
+        if (socialResponse.ok) {
+          const socialData = await socialResponse.json();
+          Object.assign(nextStats, socialData);
+        }
+        setSocialStats(nextStats);
       } catch (error) {
         console.error('Failed to fetch social stats', error);
       }
@@ -706,6 +934,24 @@ export default function App() {
     setIsGenerating(false);
   };
 
+  if (currentPath === '/neural-override') {
+    return (
+      <div className="min-h-screen bg-black text-gray-200 selection:bg-red-600 selection:text-white font-mono">
+        <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
+        <NeuralOverridePage onNavigate={navigateTo} />
+      </div>
+    );
+  }
+
+  if (currentPath === '/terms' || currentPath === '/privacy') {
+    return (
+      <div className="min-h-screen bg-[#0a0505] text-gray-200 selection:bg-red-600 selection:text-white font-mono">
+        <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
+        <PolicyPage type={currentPath === '/privacy' ? 'privacy' : 'terms'} onNavigate={navigateTo} />
+      </div>
+    );
+  }
+
   if (currentPath === '/lore') {
     return (
       <div className="min-h-screen bg-[#0a0505] text-gray-200 selection:bg-red-600 selection:text-white font-mono">
@@ -736,6 +982,26 @@ export default function App() {
     );
   }
 
+  if (currentPath === '/staff') {
+    return (
+      <div className="min-h-screen bg-[#0a0505] text-gray-200 selection:bg-red-600 selection:text-white font-mono">
+        <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
+        <Navbar currentPath={currentPath} onNavigate={navigateTo} />
+        <StaffPage onNavigate={navigateTo} />
+      </div>
+    );
+  }
+
+  if (currentPath === '/patreon') {
+    return (
+      <div className="min-h-screen bg-[#0a0505] text-gray-200 selection:bg-red-600 selection:text-white font-mono">
+        <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
+        <Navbar currentPath={currentPath} onNavigate={navigateTo} />
+        <PatreonPage onNavigate={navigateTo} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0505] text-gray-200 selection:bg-red-600 selection:text-white font-mono">
       <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
@@ -744,7 +1010,11 @@ export default function App() {
 
       <section id="home" className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a0a0a_1px,transparent_1px),linear-gradient(to_bottom,#1a0a0a_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="relative mb-12 h-[220px] overflow-hidden border-2 border-red-600/50 bg-[#0d0707] shadow-[0_0_50px_rgba(220,38,38,0.15)] md:h-[360px]">
+            <img src="/vexon-banner.png" alt="Vexon in a neon city" className="h-full w-full object-cover object-center" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0505]/70 via-transparent to-black/10" />
+          </div>
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }}>
             <div className="flex items-center gap-3 mb-6">
               <span className="px-2 py-0.5 bg-red-600 text-[10px] font-black text-white uppercase italic">Active</span>
@@ -756,6 +1026,10 @@ export default function App() {
             <p className="text-lg text-gray-400 mb-10 max-w-lg leading-relaxed border-l-4 border-red-600 pl-6 bg-red-600/5 py-4">
               A creator-first system built around live presence, sharp visuals, and a relentless digital identity tuned for streams, music, and motion.
             </p>
+            <p className="mb-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-red-500/80">
+              <img src="/vexon-logo.png" alt="" className="h-5 w-5 object-cover mix-blend-multiply" />
+              Signal hint: the VEXON_SYS mark hides a classified override.
+            </p>
             <div className="flex flex-wrap gap-4">
               <a href="#live" className="bg-red-600 text-white px-10 py-5 font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all flex items-center border-b-4 border-red-900">
                 LIVE_FEED <Radio size={18} className="ml-2 animate-pulse" />
@@ -765,14 +1039,6 @@ export default function App() {
               </a>
             </div>
           </motion.div>
-          <div className="relative h-[500px] w-full bg-[#0d0707] border-2 border-red-600/50 shadow-[0_0_50px_rgba(220,38,38,0.15)] flex items-center justify-center overflow-hidden">
-             <Cpu size={120} className="text-red-900/10 absolute animate-pulse" />
-             <div className="z-10 w-[80%] rounded border border-red-600/25 bg-black/30 p-8 text-center backdrop-blur-sm">
-               <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-red-500">Signal Profile</div>
-               <div className="text-red-600 font-black text-3xl mb-4 italic">NEURAL_REPRESENTATION</div>
-               <div className="text-[10px] text-gray-500 uppercase tracking-widest">Digital Avatar: Vexon Unit 4.0</div>
-             </div>
-          </div>
         </div>
       </section>
 
@@ -996,6 +1262,10 @@ export default function App() {
             <a href={socialProfiles.youtube} target="_blank" rel="noreferrer" aria-label="YouTube"><Youtube size={16} className="transition-colors hover:text-white" /></a>
             <a href={socialProfiles.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok"><Music size={16} className="transition-colors hover:text-white" /></a>
             <a href={socialProfiles.instagram} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={16} className="transition-colors hover:text-white" /></a>
+          </div>
+          <div className="flex gap-4 text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">
+            <button onClick={() => navigateTo('/terms')} className="hover:text-red-400">Terms</button>
+            <button onClick={() => navigateTo('/privacy')} className="hover:text-red-400">Privacy</button>
           </div>
         </div>
       </footer>
