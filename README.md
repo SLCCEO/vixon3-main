@@ -63,25 +63,23 @@ Enable the YouTube Data API v3 for the Google key. Authorize the TikTok account 
 
 Terms of Service (TOS)
 
-By accessing this project, you agree to the following legally binding terms:
+By accessing or using this project, you agree to the following terms. This README is a project notice and does not replace a separately signed license agreement.
 
-1. Ownership & Copyright Jeremiah_YT retains all ownership and copyright of Vixon/Vexon SYS. This includes, but is not limited to, all source code, assets, documentation, and branding.
+1. Ownership & Copyright Jeremiah_YT and VexonStudio retain all ownership and copyright in Vixon/Vexon SYS, including the source code, assets, documentation, branding, API integrations, and updates. Any source code copied, retained, redistributed, or used without the required permission will be treated as stolen and unauthorized VexonStudio and Jeremiah_YT code.
 
-2. Absolute Prohibition of Use Any use of the code within this project—including but not limited to copying, forking, modifying, distributing, or incorporating it into other projects—is strictly prohibited. Any unauthorized use of the source code is considered a direct violation of copyright law and will be treated as copyright infringement.
+2. Patreon License Requirement Use, possession, or modification of the source code, updates, installation materials, API-key updates, or related support is permitted only after the applicable Patreon tier has been paid for and while its permission remains valid, or after a separate source-code license has been purchased from Jeremiah_YT or VexonStudio. A Patreon subscription does not transfer ownership of the project.
 
-3. Liability Vixon/Vexon SYS is provided for demonstration purposes only. Jeremiah_YT is not liable for any damages or issues arising from the viewing or unauthorized use of this software.
+3. Permitted Changes Only a user who has paid for the qualifying Patreon tier or purchased a paid source-code license may install, configure, or modify an authorized copy for their own use. Payment must occur before any modification is made. Any changes must remain subject to these terms. Redistribution, resale, sublicensing, public reposting, or claiming authorship is not permitted unless Jeremiah_YT or VexonStudio provides written permission.
 
-4. Prohibited Actions * No Modification: You may not modify, fork, or alter this project in any way.
+4. Notice of Use Users must inform Jeremiah_YT or VexonStudio staff before using, deploying, or materially modifying the website or its source code under a Patreon-based permission. Unauthorized use, including use without the required payment or notice, may result in a copyright complaint, DMCA takedown request, termination of permission, and other remedies available under applicable law.
 
+5. Nonrenewal If a user stops renewing the qualifying Patreon subscription, permission to receive future updates, API-key updates, installation assistance, and support ends. The user agrees to keep their authorized version up to date with required security and compatibility updates after nonrenewal, where updates are made available, and remains responsible for their continued use of the code. Nonrenewal does not grant permission to obtain or use future paid updates without a new qualifying payment or written license.
 
+6. No Warranty or Responsibility Vixon/Vexon SYS is provided as-is. Jeremiah_YT and VexonStudio are not responsible for the user's deployment, modifications, API keys, infrastructure, security practices, downtime, data loss, legal compliance, or any damages arising from the user's use of the code. Users are responsible for securing their own credentials and complying with all third-party platform terms.
 
-No Distribution: You may not share or redistribute the source code in any format.
+7. Prohibited Actions Unauthorized copying, possession, retention, forking, distribution, resale, commercial use, attribution theft, or incorporation into another project is prohibited. Code that is not covered by a paid Patreon tier, paid source-code license, or written permission must not be kept or used and may be treated as stolen VexonStudio and Jeremiah_YT code. The same restrictions apply to API keys, installation materials, updates, and support content supplied through Patreon.
 
-No Commercial Use: You may not use any part of this project for commercial gain.
-
-No Attribution Theft: Do not attempt to bypass copyright or claim authorship.
-
-5. AI Disclaimer Jeremiah_YT holds no responsibility regarding the use of Google AI or any related AI services that interact with this project. Any outcomes or consequences from AI tools are the sole responsibility of the user.
+8. AI Disclaimer Jeremiah_YT and VexonStudio hold no responsibility regarding the use of Google AI or any related AI services that interact with this project. Any outcomes or consequences from AI tools are the sole responsibility of the user.
 
 Contact & Licensing
 
@@ -91,4 +89,4 @@ For inquiries regarding licensing, commercial permissions, or professional colla
 
 
 
-Notice: Unauthorized use of this project will be met with appropriate legal action.
+Notice: Use the project only under an active qualifying Patreon subscription, a separate paid source-code license, or written permission from Jeremiah_YT or VexonStudio. Unauthorized use may be met with a DMCA takedown request and other appropriate legal action.
