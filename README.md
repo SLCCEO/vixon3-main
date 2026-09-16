@@ -54,9 +54,11 @@ YOUTUBE_CHANNEL_ID=your-youtube-channel-id
 TIKTOK_ACCESS_TOKEN=your-tiktok-user-access-token
 DISCORD_BOT_TOKEN=your-discord-bot-token
 DISCORD_GUILD_ID=your-discord-server-id
+DISCORD_SERVICE_URL=https://your-discord-bot-service.example.com
+DISCORD_SERVICE_API_KEY=the-same-value-as-the-bot-BOT_API_KEY
 ```
 
-Enable the YouTube Data API v3 for the Google key. Authorize the TikTok account through Login Kit with both `user.info.basic` and `user.info.stats`; the latter provides follower, following, likes, and video counts. The token must belong to the account whose follower count should be displayed. Invite the Discord bot to the server and enable the Server Members Intent if your bot setup requires it. Missing or unauthorized services return `null` for that card while the other counts continue loading.
+Enable the YouTube Data API v3 for the Google key. Authorize the TikTok account through Login Kit with both `user.info.basic` and `user.info.stats`; the latter provides follower, following, likes, and video counts. The token must belong to the account whose follower count should be displayed. The separate Discord bot project lives in `discord-bot/`; deploy it as a long-running Node service, then set `DISCORD_SERVICE_URL` and `DISCORD_SERVICE_API_KEY` in Vercel. Missing or unauthorized services return `null` for that card while the other counts continue loading.
 
 Terms of Service (TOS)
 

@@ -780,7 +780,7 @@ const PartnershipsPage = ({ dubbyLink, dubbyCouponCode, onNavigate }) => (
 );
 
 const StaffPage = ({ onNavigate }) => {
-  const staff = [
+  const defaultStaff = [
     { role: 'Brand Founder / Chief Executive Officer', name: 'VexonCore', detail: 'Brand vision, executive direction, and creator leadership.' },
     { role: 'Brand Manager in Training / Chief Content Officer', name: 'Testing10325', detail: 'Brand development, content strategy, and staff leadership.' },
     { role: 'Admin', name: 'Shadow', detail: 'Community administration and support.' },
@@ -788,6 +788,24 @@ const StaffPage = ({ onNavigate }) => {
     { role: 'Mod', name: 'Killer I', detail: 'Community moderation and support.' },
     { role: 'T Mod', name: 'gisellehrndz', detail: 'Community moderation and support.' },
   ];
+  const [staff, setStaff] = useState(defaultStaff);
+
+  useEffect(() => {
+    fetch('/api/discord-staff')
+      .then((response) => {
+        if (!response.ok) throw new Error('Discord staff service unavailable');
+        return response.json();
+      })
+      .then(({ staff: discordStaff = [] }) => {
+        setStaff((currentStaff) => currentStaff.map((member) => {
+          const liveMember = discordStaff.find((profile) => profile.name === member.name);
+          return liveMember && !liveMember.unavailable
+            ? { ...member, name: liveMember.displayName || member.name, avatarUrl: liveMember.avatarUrl, discordStatus: liveMember.status }
+            : member;
+        }));
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="pt-32 pb-24">
@@ -798,7 +816,7 @@ const StaffPage = ({ onNavigate }) => {
             <button onClick={() => onNavigate('/')} className="rounded border border-red-600/30 bg-black/40 px-5 py-3 text-[10px] font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/10 hover:text-white">Return Home</button>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {staff.map((member) => <article key={member.role} className="border border-red-600/20 bg-[#0d0707] p-7"><UserRound className="mb-8 text-red-500" size={24} /><div className="mb-2 text-[10px] font-black uppercase tracking-[0.25em] text-red-400">{member.role}</div><h2 className="mb-3 text-2xl font-black uppercase italic text-white">{member.name}</h2><p className="text-sm leading-7 text-gray-400">{member.detail}</p></article>)}
+            {staff.map((member) => <article key={member.role} className="border border-red-600/20 bg-[#0d0707] p-7"><div className="mb-8 flex items-center gap-3">{member.avatarUrl ? <img src={member.avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover" /> : <UserRound className="text-red-500" size={24} />} {member.discordStatus && <span className="text-[9px] font-black uppercase tracking-[0.15em] text-red-400">Discord {member.discordStatus}</span>}</div><div className="mb-2 text-[10px] font-black uppercase tracking-[0.25em] text-red-400">{member.role}</div><h2 className="mb-3 text-2xl font-black uppercase italic text-white">{member.name}</h2><p className="text-sm leading-7 text-gray-400">{member.detail}</p></article>)}
           </div>
           <div className="mt-8 flex items-center gap-4 border border-red-600/20 bg-black/30 p-5 text-sm text-gray-300"><Crown className="shrink-0 text-red-500" size={20} /> Staff profiles can be expanded as the team grows. <a className="font-black text-red-400 hover:text-white" href="https://discord.gg/YUYhtgXZjw" target="_blank" rel="noreferrer">Join HQ on Discord</a></div>
         </div>

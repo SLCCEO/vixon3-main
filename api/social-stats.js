@@ -26,11 +26,11 @@ const getTiktokFollowers = async () => {
 };
 
 const getDiscordMembers = async () => {
-  if (!process.env.DISCORD_BOT_TOKEN || !process.env.DISCORD_GUILD_ID) return null;
-  const data = await fetchJson(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}?with_counts=true`, {
-    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
+  if (!process.env.DISCORD_SERVICE_URL || !process.env.DISCORD_SERVICE_API_KEY) return null;
+  const data = await fetchJson(`${process.env.DISCORD_SERVICE_URL.replace(/\/$/, '')}/api/stats`, {
+    headers: { 'x-api-key': process.env.DISCORD_SERVICE_API_KEY },
   });
-  return data.approximate_member_count ?? data.member_count ?? null;
+  return data.members ?? null;
 };
 
 export default async function handler(request, response) {
