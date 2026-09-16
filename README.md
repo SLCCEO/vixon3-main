@@ -30,6 +30,10 @@ The token must have permission to read the creator's campaigns and members. Keep
 
 Without the token configured, the page shows that Patreon API setup is required and does not display placeholder names.
 
+Source-code tier
+
+The source-code access tier is **The System Architect**. Join the tier through the [VexonStudio Patreon membership page](https://www.patreon.com/cw/VexonStudios/membership). After the qualifying payment is verified, Jeremiah_YT or VexonStudio staff will provide the authorized source-code access and related installation information. Source-code access is not a public or unrestricted download and remains subject to the terms below.
+
 Twitch streamer data
 
 The `/streamers` page requests `/api/twitch`. Configure these server-side Vercel environment variables before deployment:
