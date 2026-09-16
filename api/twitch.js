@@ -3,6 +3,7 @@ const streamerLogins = [
   'ladychaosvtuber',
   'chloepanzer',
   'skylord2098',
+  'zephiezephira',
   'deelexic',
   'duhgobby',
 ];
