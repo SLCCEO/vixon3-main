@@ -53,6 +53,13 @@ const getApiKey = () => {
 };
 
 const apiKey = getApiKey();
+const liveDataRefreshMs = 5 * 60 * 1000;
+
+const fetchLiveData = (endpoint, signal) => fetch(`${endpoint}${endpoint.includes('?') ? '&' : '?'}_=${Date.now()}`, {
+  cache: 'no-store',
+  headers: { Accept: 'application/json' },
+  signal,
+});
 
 const parseCount = (value) => {
   if (value === null || value === undefined || value === '') return null;
@@ -625,16 +632,34 @@ const StreamersPage = ({ onNavigate }) => {
   const [twitchStatus, setTwitchStatus] = useState('Syncing Twitch data');
 
   useEffect(() => {
-    fetch('/api/twitch')
-      .then((response) => {
+    let isActive = true;
+    let controller;
+    const loadTwitchProfiles = async () => {
+      controller?.abort();
+      controller = new AbortController();
+      try {
+        const response = await fetchLiveData('/api/twitch', controller.signal);
         if (!response.ok) throw new Error('Twitch data unavailable');
-        return response.json();
-      })
-      .then(({ streamers = [] }) => {
+        const { streamers = [] } = await response.json();
+        if (!isActive) return;
         setTwitchProfiles(Object.fromEntries(streamers.map((streamer) => [streamer.login, streamer])));
         setTwitchStatus('Twitch data synced');
-      })
-      .catch(() => setTwitchStatus('Twitch API setup required'));
+      } catch (error) {
+        if (error.name !== 'AbortError' && isActive) setTwitchStatus('Twitch API setup required');
+      }
+    };
+    const refreshOnFocus = () => { if (!document.hidden) loadTwitchProfiles(); };
+    loadTwitchProfiles();
+    const interval = window.setInterval(loadTwitchProfiles, liveDataRefreshMs);
+    window.addEventListener('focus', refreshOnFocus);
+    document.addEventListener('visibilitychange', refreshOnFocus);
+    return () => {
+      isActive = false;
+      controller?.abort();
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refreshOnFocus);
+      document.removeEventListener('visibilitychange', refreshOnFocus);
+    };
   }, []);
 
   return (
@@ -791,20 +816,35 @@ const StaffPage = ({ onNavigate }) => {
   const [staff, setStaff] = useState(defaultStaff);
 
   useEffect(() => {
-    fetch('/api/discord-staff')
-      .then((response) => {
+    let isActive = true;
+    let controller;
+    const loadStaff = async () => {
+      controller?.abort();
+      controller = new AbortController();
+      try {
+        const response = await fetchLiveData('/api/discord-staff', controller.signal);
         if (!response.ok) throw new Error('Discord staff service unavailable');
-        return response.json();
-      })
-      .then(({ staff: discordStaff = [] }) => {
+        const { staff: discordStaff = [] } = await response.json();
+        if (!isActive) return;
         setStaff((currentStaff) => currentStaff.map((member) => {
           const liveMember = discordStaff.find((profile) => profile.name === member.name);
           return liveMember && !liveMember.unavailable
             ? { ...member, name: liveMember.displayName || member.name, avatarUrl: liveMember.avatarUrl, discordStatus: liveMember.status }
             : member;
         }));
-      })
-      .catch(() => {});
+      } catch (error) {
+        if (error.name !== 'AbortError') return;
+      }
+    };
+    loadStaff();
+    const interval = window.setInterval(loadStaff, liveDataRefreshMs);
+    window.addEventListener('focus', loadStaff);
+    return () => {
+      isActive = false;
+      controller?.abort();
+      window.clearInterval(interval);
+      window.removeEventListener('focus', loadStaff);
+    };
   }, []);
 
   return (
@@ -831,13 +871,31 @@ const PatreonPage = ({ onNavigate }) => {
 
   useEffect(() => {
     const endpoint = import.meta.env.VITE_PATREON_MEMBERS_URL || '/api/patreon';
-    fetch(endpoint).then((response) => {
-      if (!response.ok) throw new Error('Supporter feed unavailable');
-      return response.json();
-    }).then((data) => {
-      setMembers(Array.isArray(data) ? data : data.members || []);
-      setStatus('Live supporter feed connected');
-    }).catch(() => setStatus('Patreon API setup required'));
+    let isActive = true;
+    let controller;
+    const loadMembers = async () => {
+      controller?.abort();
+      controller = new AbortController();
+      try {
+        const response = await fetchLiveData(endpoint, controller.signal);
+        if (!response.ok) throw new Error('Supporter feed unavailable');
+        const data = await response.json();
+        if (!isActive) return;
+        setMembers(Array.isArray(data) ? data : data.members || []);
+        setStatus('Live supporter feed connected');
+      } catch (error) {
+        if (error.name !== 'AbortError' && isActive) setStatus('Patreon API setup required');
+      }
+    };
+    loadMembers();
+    const interval = window.setInterval(loadMembers, liveDataRefreshMs);
+    window.addEventListener('focus', loadMembers);
+    return () => {
+      isActive = false;
+      controller?.abort();
+      window.clearInterval(interval);
+      window.removeEventListener('focus', loadMembers);
+    };
   }, []);
 
   return (
@@ -905,8 +963,8 @@ export default function App() {
     const fetchLiveStats = async () => {
       try {
         const [twitchResponse, socialResponse] = await Promise.all([
-          fetch('/api/twitch'),
-          fetch('/api/social-stats'),
+          fetchLiveData('/api/twitch'),
+          fetchLiveData('/api/social-stats'),
         ]);
         const nextStats = { twitchFollowers: null, youtubeSubscribers: null, tiktokFollowers: null, discordMembers: null };
         if (twitchResponse.ok) {
@@ -924,6 +982,12 @@ export default function App() {
     };
 
     fetchLiveStats();
+    const interval = window.setInterval(fetchLiveStats, liveDataRefreshMs);
+    window.addEventListener('focus', fetchLiveStats);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', fetchLiveStats);
+    };
   }, []);
 
   useEffect(() => {
