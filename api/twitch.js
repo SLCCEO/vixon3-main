@@ -20,7 +20,27 @@ const getTwitchToken = async () => {
   return data.access_token;
 };
 
-const fetchTwitchData = async (appToken) => {
+const getTwitchUserToken = async () => {
+  if (process.env.TWITCH_REFRESH_TOKEN) {
+    const params = new URLSearchParams({
+      client_id: process.env.TWITCH_CLIENT_ID,
+      client_secret: process.env.TWITCH_CLIENT_SECRET,
+      grant_type: 'refresh_token',
+      refresh_token: process.env.TWITCH_REFRESH_TOKEN,
+    });
+    const response = await fetch('https://id.twitch.tv/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params,
+    });
+    if (!response.ok) throw new Error('Twitch user token refresh failed');
+    return (await response.json()).access_token;
+  }
+
+  return process.env.TWITCH_ACCESS_TOKEN;
+};
+
+const fetchTwitchData = async (appToken, userToken) => {
   const profileHeaders = {
     Authorization: `Bearer ${appToken}`,
     'Client-Id': process.env.TWITCH_CLIENT_ID,
@@ -32,12 +52,12 @@ const fetchTwitchData = async (appToken) => {
 
   return Promise.all(users.map(async (user) => {
     let followersData = {};
-    if (process.env.TWITCH_ACCESS_TOKEN) {
+    if (userToken) {
       const followersResponse = await fetch(
         `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${encodeURIComponent(user.id)}`,
         {
           headers: {
-            Authorization: `Bearer ${process.env.TWITCH_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${userToken}`,
             'Client-Id': process.env.TWITCH_CLIENT_ID,
           },
         },
@@ -66,8 +86,8 @@ export default async function handler(request, response) {
   }
 
   try {
-    const token = await getTwitchToken();
-    const streamers = await fetchTwitchData(token);
+    const [appToken, userToken] = await Promise.all([getTwitchToken(), getTwitchUserToken()]);
+    const streamers = await fetchTwitchData(appToken, userToken);
     return response.status(200).json({ streamers });
   } catch (error) {
     console.error('Twitch API error:', error);
