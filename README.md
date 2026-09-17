@@ -10,7 +10,7 @@ This project is a React + TypeScript + Vite template providing a minimal setup f
 
 Official Links
 
-Live Example: https://vixon3.vercel.app
+Live Example: https://www.vixon.online
 
 Developer Portfolio: https://jeremiah-portfolio-mu.vercel.app
 
