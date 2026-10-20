@@ -1,79 +1,78 @@
 import 'dotenv/config';
-import cors from 'cors';
-import express from 'express';
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, Collection, GatewayIntentBits } from 'discord.js';
+import { readdir } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { loadCommands } from './utils/load-commands.js';
+import { startWebsiteApi } from './api/server.js';
+import { getJoinMonitoringConfig } from './utils/join-monitor.js';
 
-const required = ['DISCORD_BOT_TOKEN', 'DISCORD_GUILD_ID', 'BOT_API_KEY'];
+const required = [
+  'DISCORD_BOT_TOKEN',
+  'DISCORD_GUILD_ID',
+  'BOT_API_KEY',
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY'
+];
 const missing = required.filter((name) => !process.env[name]);
 if (missing.length) {
   throw new Error(`Missing environment variables: ${missing.join(', ')}`);
 }
 
-const parseStaffIds = () => {
-  try {
-    return JSON.parse(process.env.DISCORD_STAFF_IDS || '{}');
-  } catch {
-    throw new Error('DISCORD_STAFF_IDS must be valid JSON');
-  }
-};
+const joinMonitoringConfig = getJoinMonitoringConfig();
+if (!joinMonitoringConfig.alertChannelId) {
+  console.warn('MODERATION_ALERT_CHANNEL_ID is unset; join-monitor alerts will only appear in the bot console.');
+}
 
-const staffIds = parseStaffIds();
+let staffIds;
+try {
+  staffIds = JSON.parse(process.env.DISCORD_STAFF_IDS || '{}');
+} catch (error) {
+  throw new Error('DISCORD_STAFF_IDS must contain valid JSON.', { cause: error });
+}
+if (!staffIds || Array.isArray(staffIds) || typeof staffIds !== 'object') {
+  throw new TypeError('DISCORD_STAFF_IDS must be a JSON object mapping display names to Discord user IDs.');
+}
+
+const rootDirectory = path.dirname(fileURLToPath(import.meta.url));
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildPresences],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildPresences
+  ]
 });
-const app = express();
-const port = Number(process.env.PORT || 8788);
+client.commands = new Collection();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
-
-const authorized = (request, response, next) => {
-  if (request.get('x-api-key') !== process.env.BOT_API_KEY) {
-    return response.status(401).json({ error: 'Unauthorized' });
+const commands = await loadCommands(path.join(rootDirectory, 'commands'));
+for (const command of commands) {
+  if (client.commands.has(command.data.name)) {
+    throw new Error(`Duplicate command name: ${command.data.name}`);
   }
-  return next();
-};
+  client.commands.set(command.data.name, command);
+}
 
-const getGuild = () => client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+const eventsDirectory = path.join(rootDirectory, 'events');
+const eventNames = await readdir(eventsDirectory);
+for (const eventName of eventNames.filter((name) => name.endsWith('.js')).sort()) {
+  const eventPath = pathToFileURL(path.join(eventsDirectory, eventName)).href;
+  const event = (await import(eventPath)).default;
+  if (!event?.name || typeof event.execute !== 'function') {
+    throw new TypeError(`Invalid event module: ${eventName}`);
+  }
 
-app.get('/health', (_request, response) => {
-  response.json({ online: client.isReady(), bot: client.user?.tag || null });
-});
+  const handler = (...args) => event.execute(...args);
+  client[event.once ? 'once' : 'on'](event.name, handler);
+}
 
-app.get('/api/staff', authorized, async (_request, response) => {
-  const guild = getGuild();
-  if (!guild) return response.status(503).json({ error: 'Discord guild is not available' });
-
-  const members = await Promise.all(Object.entries(staffIds).map(async ([name, userId]) => {
-    try {
-      const member = await guild.members.fetch(userId);
-      return {
-        name,
-        userId,
-        username: member.user.username,
-        displayName: member.displayName,
-        avatarUrl: member.displayAvatarURL({ size: 256, extension: 'png' }),
-        roles: member.roles.cache.filter((role) => role.id !== guild.id).map((role) => role.name),
-        status: member.presence?.status || 'offline',
-      };
-    } catch {
-      return { name, userId, unavailable: true };
-    }
-  }));
-
-  return response.json({ staff: members });
-});
-
-app.get('/api/stats', authorized, (_request, response) => {
-  const guild = getGuild();
-  if (!guild) return response.status(503).json({ error: 'Discord guild is not available' });
-  const onlineMembers = guild.presences.cache.filter((presence) => presence.status !== 'offline').size;
-  return response.json({ members: guild.memberCount, onlineMembers });
-});
-
+const server = startWebsiteApi(client, staffIds);
 client.once('clientReady', () => {
-  console.log(`Discord bot ready as ${client.user.tag}`);
-  console.log(`API listening on port ${port}`);
+  console.info(`Discord bot ready as ${client.user.tag}`);
 });
 
-app.listen(port);
-client.login(process.env.DISCORD_BOT_TOKEN);
+try {
+  await client.login(process.env.DISCORD_BOT_TOKEN);
+} catch (error) {
+  server.close();
+  throw error;
+}

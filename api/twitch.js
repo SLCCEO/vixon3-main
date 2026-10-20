@@ -4,7 +4,6 @@ const streamerLogins = [
   'chloepanzer',
   'skylord2098',
   'zephiezephira',
-  'deelexic',
   'duhgobby',
 ];
 

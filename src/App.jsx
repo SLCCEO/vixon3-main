@@ -622,9 +622,8 @@ const streamerProfiles = [
   { name: 'Lady Chaos', login: 'ladychaosvtuber', platform: 'Streamer', handle: '@ladychaosvtuber', bio: 'Embracing chaos as a variety streamer deity, I delve into any game or stream that piques my interest. Often found exploring the spooky realms with Dixper by my side, I also enjoy the occasional cozy game stream. Join me for a whirlwind of gaming adventures!', url: 'https://www.twitch.tv/ladychaosvtuber/about' },
   { name: 'Chloë Panzer', login: 'chloepanzer', platform: 'Streamer', handle: '@chloepanzer', bio: "Hey, lovelies. I'm Chloë (umlaut optional), a little cat who loves weapons and military vehicles.", url: 'https://www.twitch.tv/chloepanzer' },
   { name: 'Skylord3098', login: 'skylord2098', platform: 'Streamer', handle: '@skylord2098', bio: "Hey I'm Skylord, your Texan timelord. I stream on Twitch every Friday and Saturday at 7:00pm CST.", url: 'https://www.twitch.tv/skylord2098' },
-  { name: 'Zephie', login: 'zephiezephira', platform: 'Streamer', handle: '@zephiezephira', bio: 'Hi, I\'m Zephie, and I\'m a beginner vtuber! I\'m a variety streamer who enjoys community interaction. I have two requests for you: please be kind to me and other viewers, and have fun! Thanks!♡', url: 'https://www.twitch.tv/zephiezephira' },
+  { name: 'Zephie', login: 'zephiezephira', platform: 'Streamer', handle: '@zephiezephira', bio: 'Hi, I\'m Zephie, and I\'m a beginner vtuber! I\'m a variety streamer who enjoys community interaction. I have two requests for you: please be kind to me and other viewers, and have fun! Thanks!♡', url: 'https://www.twitch.tv/zephiezephira', discordUrl: 'https://discord.gg/gygUuUPQJW' },
   { name: 'duhgobby', login: 'duhgobby', platform: 'Streamer', handle: '@duhgobby', bio: 'Just a damn goblin playing dumb games.', url: 'https://www.twitch.tv/duhgobby' },
-  { name: 'deelexic', login: 'deelexic', platform: 'Streamer', handle: '@deelexic', bio: "Heya! I'm Dee Lex (ic is silent lol). I sometimes chat, very chill and laidback streams. Stay for a fun time not a long time ;3", url: 'https://www.twitch.tv/deelexic' },
 ];
 
 const StreamersPage = ({ onNavigate }) => {
@@ -692,6 +691,7 @@ const StreamersPage = ({ onNavigate }) => {
                 <h3 className="mb-2 text-xl font-black uppercase italic text-white">{streamer.name}</h3>
                 <p className="mb-6 text-xs text-gray-500">{streamer.handle}</p>
                 <p className="mb-6 min-h-10 text-sm leading-6 text-gray-300">{streamer.bio}</p>
+                {streamer.discordUrl && <a href={streamer.discordUrl} target="_blank" rel="noreferrer" className="mb-6 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 transition hover:text-white">Join Zephie&apos;s Discord <ExternalLink size={14} /></a>}
                 <div className="mb-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-red-400"><Twitch size={14} /> {twitchProfile?.followers === null || twitchProfile?.followers === undefined ? 'Followers unavailable' : `${toCompactNumber(twitchProfile.followers)} followers`}</div>
                 <a href={streamer.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 transition group-hover:text-white">View Twitch channel <ExternalLink size={14} /></a>
               </article>
@@ -743,6 +743,21 @@ const PartnershipsPage = ({ dubbyLink, dubbyCouponCode, onNavigate }) => (
                 </a>
                 <div className="rounded border border-red-600/20 bg-black/30 px-4 py-3 text-sm font-black uppercase tracking-[0.25em] text-white">
                   Code: {dubbyCouponCode}
+                </div>
+              </div>
+              <div className="mt-6 rounded border border-red-600/20 bg-gradient-to-br from-red-600/10 to-black/30 p-5">
+                <div className="mb-3 flex items-center gap-2 text-red-400">
+                  <BadgeCheck size={18} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">Community Partnership</span>
+                </div>
+                <h3 className="mb-2 text-2xl font-black uppercase italic text-white">Orion OS</h3>
+                <p className="text-sm leading-7 text-gray-300">
+                  An operating system project developed by members of the Star Citizen community.
+                </p>
+                <div className="mt-5">
+                  <a href="https://www.orionos.app" target="_blank" rel="noreferrer" className="inline-flex rounded border border-red-600/30 bg-red-600/10 px-4 py-3 text-sm font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/20 hover:text-white">
+                    Visit Orion OS
+                  </a>
                 </div>
               </div>
             </div>
@@ -810,7 +825,6 @@ const StaffPage = ({ onNavigate }) => {
     { role: 'Brand Manager in Training / Chief Content Officer', name: 'Testing10325', detail: 'Brand development, content strategy, and staff leadership.' },
     { role: 'Admin', name: 'Shadow', detail: 'Community administration and support.' },
     { role: 'Mod', name: 'A Random User', detail: 'Community moderation and support.' },
-    { role: 'Mod', name: 'Killer I', detail: 'Community moderation and support.' },
     { role: 'T Mod', name: 'gisellehrndz', detail: 'Community moderation and support.' },
   ];
   const [staff, setStaff] = useState(defaultStaff);
@@ -1123,6 +1137,24 @@ export default function App() {
           </motion.div>
         </div>
       </section>
+
+      {new Date().getMonth() === 10 && (
+        <section id="november-events" className="border-y border-amber-500/30 bg-gradient-to-r from-amber-950/40 via-[#0d0707] to-orange-950/30 py-12">
+          <div className="container mx-auto flex flex-wrap items-center justify-between gap-6 px-6">
+            <div>
+              <div className="mb-3 flex items-center gap-2 text-amber-400">
+                <CalendarDays size={18} />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Seasonal Update // November</span>
+              </div>
+              <h2 className="mb-2 text-3xl font-black uppercase italic text-white">November Community Events</h2>
+              <p className="max-w-2xl text-sm leading-6 text-gray-300">Follow the VEXON Discord for November stream dates, community events, and seasonal announcements as they are confirmed.</p>
+            </div>
+            <a href="https://discord.gg/YUYhtgXZjw" target="_blank" rel="noreferrer" className="rounded border border-amber-500/40 bg-amber-500/10 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-amber-300 transition hover:bg-amber-500/20 hover:text-white">
+              Event Updates <ExternalLink size={14} className="ml-2 inline" />
+            </a>
+          </div>
+        </section>
+      )}
 
       <section id="live" className="py-24 relative bg-black border-y border-red-900/30">
         <div className="container mx-auto px-6">
