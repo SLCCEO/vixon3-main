@@ -1,6 +1,7 @@
 const streamerLogins = [
   'vexoncore',
   'testing10325',
+  'suoni_ttv',
   'ladychaosvtuber',
   'chloepanzer',
   'skylord2098',

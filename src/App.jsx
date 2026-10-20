@@ -692,6 +692,7 @@ const streamerProfiles = [
   { name: 'Skylord3098', login: 'skylord2098', platform: 'Streamer', handle: '@skylord2098', bio: "Hey I'm Skylord, your Texan timelord. I stream on Twitch every Friday and Saturday at 7:00pm CST.", url: 'https://www.twitch.tv/skylord2098' },
   { name: 'Zephie', login: 'zephiezephira', platform: 'Streamer', handle: '@zephiezephira', bio: 'Hi, I\'m Zephie, and I\'m a beginner vtuber! I\'m a variety streamer who enjoys community interaction. I have two requests for you: please be kind to me and other viewers, and have fun! Thanks!♡', url: 'https://www.twitch.tv/zephiezephira', discordUrl: 'https://discord.gg/gygUuUPQJW' },
   { name: 'Testing10325', login: 'testing10325', platform: 'Streamer', handle: '@testing10325', bio: 'Visit Testing10325 on Twitch.', url: 'https://www.twitch.tv/testing10325' },
+  { name: 'Suoni TTV', login: 'suoni_ttv', platform: 'Streamer', handle: '@suoni_ttv', bio: 'Visit Suoni TTV on Twitch.', url: 'https://www.twitch.tv/suoni_ttv' },
   { name: 'duhgobby', login: 'duhgobby', platform: 'Streamer', handle: '@duhgobby', bio: 'Just a damn goblin playing dumb games.', url: 'https://www.twitch.tv/duhgobby' },
 ];
 
