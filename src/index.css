@@ -6,3 +6,156 @@ body {
   margin: 0;
   padding: 0;
 }
+
+html[data-season="new-year"] {
+  --season-accent: #60a5fa;
+  --season-wash: rgba(37, 99, 235, 0.18);
+}
+
+html[data-season="valentines"] {
+  --season-accent: #f472b6;
+  --season-wash: rgba(219, 39, 119, 0.18);
+}
+
+html[data-season="st-patricks"] {
+  --season-accent: #4ade80;
+  --season-wash: rgba(22, 163, 74, 0.18);
+}
+
+html[data-season="easter"] {
+  --season-accent: #c084fc;
+  --season-wash: rgba(192, 132, 252, 0.18);
+}
+
+html[data-season="independence-day"] {
+  --season-accent: #60a5fa;
+  --season-wash: rgba(37, 99, 235, 0.18);
+}
+
+html[data-season="halloween"] {
+  --season-accent: #fb923c;
+  --season-wash: rgba(234, 88, 12, 0.2);
+}
+
+html[data-season="thanksgiving"],
+html[data-season="autumn"] {
+  --season-accent: #f59e0b;
+  --season-wash: rgba(217, 119, 6, 0.18);
+}
+
+html[data-season="christmas"] {
+  --season-accent: #4ade80;
+  --season-wash: rgba(22, 163, 74, 0.18);
+}
+
+html[data-season="spring"] {
+  --season-accent: #a3e635;
+  --season-wash: rgba(132, 204, 22, 0.16);
+}
+
+html[data-season="summer"] {
+  --season-accent: #facc15;
+  --season-wash: rgba(234, 179, 8, 0.16);
+}
+
+html[data-season="winter"] {
+  --season-accent: #7dd3fc;
+  --season-wash: rgba(14, 165, 233, 0.18);
+}
+
+html[data-season] .text-red-500,
+html[data-season] .text-red-400 {
+  color: var(--season-accent);
+}
+
+html[data-season] .border-red-600,
+html[data-season] .border-red-500,
+html[data-season] .border-red-900 {
+  border-color: var(--season-accent);
+}
+
+html[data-season] .bg-red-600 {
+  background-color: var(--season-accent);
+}
+
+.seasonal-notice {
+  border-color: var(--season-accent);
+  background: linear-gradient(110deg, var(--season-wash), rgba(13, 7, 7, 0.92) 60%, var(--season-wash));
+}
+
+.seasonal-notice-label,
+.seasonal-notice-link {
+  color: var(--season-accent);
+}
+
+.seasonal-notice-link {
+  border: 1px solid var(--season-accent);
+  background-color: var(--season-wash);
+}
+
+.seasonal-notice-link:hover {
+  color: white;
+  background-color: var(--season-accent);
+}
+
+.birthday-celebration {
+  background:
+    radial-gradient(ellipse at 18% 50%, rgba(236, 72, 153, 0.2), transparent 48%),
+    radial-gradient(ellipse at 82% 50%, rgba(250, 204, 21, 0.14), transparent 45%),
+    #0d0707;
+}
+
+.birthday-celebration::before,
+.birthday-celebration::after {
+  position: absolute;
+  inset: -40% 0;
+  z-index: 0;
+  content: "";
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, #f9a8d4 0 2px, transparent 2.5px),
+    radial-gradient(circle, #facc15 0 2px, transparent 2.5px),
+    radial-gradient(circle, #c4b5fd 0 2px, transparent 2.5px);
+  background-position: 0 0, 35px 55px, 80px 15px;
+  background-size: 110px 110px, 145px 145px, 180px 180px;
+  animation: birthday-confetti 12s linear infinite;
+}
+
+.birthday-celebration::after {
+  opacity: 0.55;
+  animation-delay: -6s;
+  animation-duration: 16s;
+}
+
+.birthday-celebration-content {
+  animation: birthday-glow 3s ease-in-out infinite;
+}
+
+.birthday-celebration-link {
+  border: 1px solid rgba(249, 168, 212, 0.7);
+  background: rgba(219, 39, 119, 0.18);
+  color: #f9a8d4;
+}
+
+.birthday-celebration-link:hover {
+  background: #db2777;
+  color: white;
+}
+
+@keyframes birthday-confetti {
+  from { transform: translateY(-8%); }
+  to { transform: translateY(8%); }
+}
+
+@keyframes birthday-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(249, 168, 212, 0)); }
+  50% { filter: drop-shadow(0 0 12px rgba(249, 168, 212, 0.12)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .birthday-celebration::before,
+  .birthday-celebration::after,
+  .birthday-celebration-content {
+    animation: none;
+  }
+}

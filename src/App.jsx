@@ -55,6 +55,74 @@ const getApiKey = () => {
 const apiKey = getApiKey();
 const liveDataRefreshMs = 5 * 60 * 1000;
 
+const getEasterDate = (year) => {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, month - 1, day);
+};
+
+const getSeasonalTheme = (date) => {
+  const year = date.getFullYear();
+  const today = new Date(year, date.getMonth(), date.getDate());
+  const isBetween = (start, end) => today >= start && today <= end;
+  const dayOf = (month, day) => new Date(year, month, day);
+  const easter = getEasterDate(year);
+  const easterStart = new Date(year, easter.getMonth(), easter.getDate() - 6);
+  const thanksgiving = dayOf(10, 1 + ((4 - dayOf(10, 1).getDay() + 7) % 7) + 21);
+  const thanksgivingStart = new Date(year, thanksgiving.getMonth(), thanksgiving.getDate() - 7);
+  const thanksgivingEnd = new Date(year, thanksgiving.getMonth(), thanksgiving.getDate() + 3);
+
+  if ((date.getMonth() === 11 && date.getDate() >= 26) || (date.getMonth() === 0 && date.getDate() <= 5)) {
+    return { id: 'new-year', name: 'New Year', title: 'New Year Signal', message: 'A fresh cycle begins. Check Discord for community announcements and upcoming events.' };
+  }
+  if (isBetween(dayOf(1, 1), dayOf(1, 14))) {
+    return { id: 'valentines', name: "Valentine's Day", title: 'Love Your Community', message: 'Celebrate the people who make this community special. Check Discord for event announcements.' };
+  }
+  if (isBetween(dayOf(2, 10), dayOf(2, 17))) {
+    return { id: 'st-patricks', name: "St. Patrick's Day", title: 'Lucky Season', message: 'A little extra green in the signal. Check Discord for community event announcements.' };
+  }
+  if (isBetween(easterStart, easter)) {
+    return { id: 'easter', name: 'Easter', title: 'Easter Celebration', message: 'A spring celebration is live. Check Discord for community event announcements.' };
+  }
+  if (isBetween(dayOf(5, 28), dayOf(6, 5))) {
+    return { id: 'independence-day', name: 'Independence Day', title: 'Fourth of July', message: 'Celebrate the Fourth with the community. Check Discord for event announcements.' };
+  }
+  if (isBetween(dayOf(9, 1), dayOf(10, 1))) {
+    return { id: 'halloween', name: 'Halloween', title: 'Halloween Season', message: 'Spooky season is live. Check Discord for Halloween streams and community event announcements.' };
+  }
+  if (isBetween(thanksgivingStart, thanksgivingEnd)) {
+    return { id: 'thanksgiving', name: 'Thanksgiving', title: 'Thanksgiving Week', message: 'Celebrate the season with the community. Check Discord for stream dates and event announcements.' };
+  }
+  if (isBetween(dayOf(11, 1), dayOf(11, 25))) {
+    return { id: 'christmas', name: 'Christmas', title: 'Holiday Season', message: 'The holiday season is live. Check Discord for seasonal streams and community event announcements.' };
+  }
+
+  const month = date.getMonth();
+  const day = date.getDate();
+  if ((month === 2 && day >= 20) || (month > 2 && month < 5) || (month === 5 && day <= 20)) {
+    return { id: 'spring', name: 'Spring', title: 'Spring Signal', message: 'Spring styling is active. Check Discord for community updates and upcoming events.' };
+  }
+  if ((month === 5 && day >= 21) || (month > 5 && month < 8) || (month === 8 && day <= 21)) {
+    return { id: 'summer', name: 'Summer', title: 'Summer Signal', message: 'Summer styling is active. Check Discord for community updates and upcoming events.' };
+  }
+  if ((month === 8 && day >= 22) || month === 9 || (month === 10 && day <= 30)) {
+    return { id: 'autumn', name: 'Autumn', title: 'Autumn Signal', message: 'Autumn styling is active. Check Discord for community updates and upcoming events.' };
+  }
+  return { id: 'winter', name: 'Winter', title: 'Winter Signal', message: 'Winter styling is active. Check Discord for community updates and upcoming events.' };
+};
+
 const fetchLiveData = (endpoint, signal) => fetch(`${endpoint}${endpoint.includes('?') ? '&' : '?'}_=${Date.now()}`, {
   cache: 'no-store',
   headers: { Accept: 'application/json' },
@@ -924,9 +992,10 @@ const PatreonPage = ({ onNavigate }) => {
 
 export default function App() {
   const contactEmail = "contact@vixon.online";
-  const twitchChannel = "vexoncore";
+  const twitchChannel = "testing10325";
   const dubbyLink = 'https://www.dubby.gg/discount/VexonCore?ref=k4zlh7j1';
   const dubbyCouponCode = 'VexonCore';
+  const [seasonalTheme, setSeasonalTheme] = useState(() => getSeasonalTheme(new Date()));
   const socialProfiles = {
     twitch: 'https://www.twitch.tv/vexoncore',
     youtube: 'https://www.youtube.com/@VixonOfficial',
@@ -937,6 +1006,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('stream'); 
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
   const [parentDomain, setParentDomain] = useState('');
+  const [birthdayMonthActive, setBirthdayMonthActive] = useState(() => new Date().getMonth() === 10);
   const [socialStats, setSocialStats] = useState({
     twitchFollowers: null,
     youtubeSubscribers: null,
@@ -954,6 +1024,35 @@ export default function App() {
   const [trackPrompt, setTrackPrompt] = useState('');
   const [generatedTrack, setGeneratedTrack] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    const refreshSeason = () => {
+      const now = new Date();
+      const nextTheme = getSeasonalTheme(now);
+      setSeasonalTheme((currentTheme) => currentTheme.id === nextTheme.id ? currentTheme : nextTheme);
+      setBirthdayMonthActive(now.getMonth() === 10);
+    };
+    const interval = window.setInterval(refreshSeason, 60 * 1000);
+    window.addEventListener('focus', refreshSeason);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refreshSeason);
+    };
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.birthdayMonth = String(birthdayMonthActive);
+    return () => {
+      delete document.documentElement.dataset.birthdayMonth;
+    };
+  }, [birthdayMonthActive]);
+
+  useEffect(() => {
+    document.documentElement.dataset.season = seasonalTheme.id;
+    return () => {
+      delete document.documentElement.dataset.season;
+    };
+  }, [seasonalTheme.id]);
 
   useEffect(() => {
     setParentDomain(window.location.hostname);
@@ -1138,19 +1237,35 @@ export default function App() {
         </div>
       </section>
 
-      {new Date().getMonth() === 10 && (
-        <section id="november-events" className="border-y border-amber-500/30 bg-gradient-to-r from-amber-950/40 via-[#0d0707] to-orange-950/30 py-12">
-          <div className="container mx-auto flex flex-wrap items-center justify-between gap-6 px-6">
-            <div>
-              <div className="mb-3 flex items-center gap-2 text-amber-400">
-                <CalendarDays size={18} />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Seasonal Update // November</span>
-              </div>
-              <h2 className="mb-2 text-3xl font-black uppercase italic text-white">November Community Events</h2>
-              <p className="max-w-2xl text-sm leading-6 text-gray-300">Follow the VEXON Discord for November stream dates, community events, and seasonal announcements as they are confirmed.</p>
+      <section id="seasonal-update" className="seasonal-notice border-y py-12">
+        <div className="container mx-auto flex flex-wrap items-center justify-between gap-6 px-6">
+          <div>
+            <div className="seasonal-notice-label mb-3 flex items-center gap-2">
+              <CalendarDays size={18} />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Seasonal Mode // {seasonalTheme.name}</span>
             </div>
-            <a href="https://discord.gg/YUYhtgXZjw" target="_blank" rel="noreferrer" className="rounded border border-amber-500/40 bg-amber-500/10 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-amber-300 transition hover:bg-amber-500/20 hover:text-white">
-              Event Updates <ExternalLink size={14} className="ml-2 inline" />
+            <h2 className="mb-2 text-3xl font-black uppercase italic text-white">{seasonalTheme.title}</h2>
+            <p className="max-w-2xl text-sm leading-6 text-gray-300">{seasonalTheme.message}</p>
+          </div>
+          <a href="https://discord.gg/YUYhtgXZjw" target="_blank" rel="noreferrer" className="seasonal-notice-link rounded px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition">
+            Event Updates <ExternalLink size={14} className="ml-2 inline" />
+          </a>
+        </div>
+      </section>
+
+      {birthdayMonthActive && (
+        <section id="birthday-celebration" className="birthday-celebration relative isolate overflow-hidden border-y border-pink-400/40 py-12">
+          <div className="birthday-celebration-content container relative z-10 mx-auto flex flex-wrap items-center justify-between gap-6 px-6">
+            <div>
+              <div className="mb-3 flex items-center gap-2 text-pink-300">
+                <Sparkles size={18} />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Birthday Month // November</span>
+              </div>
+              <h2 className="mb-2 text-3xl font-black uppercase italic text-white">Birthday Incoming: November 29</h2>
+              <p className="max-w-2xl text-sm leading-6 text-gray-200">It&apos;s my birthday month! My birthday is November 29. Come by my Twitch chat any time this month and wish me a happy birthday!</p>
+            </div>
+            <a href="https://www.twitch.tv/vexoncore" target="_blank" rel="noreferrer" className="birthday-celebration-link rounded px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition">
+              Wish Me Happy Birthday <Twitch size={14} className="ml-2 inline" />
             </a>
           </div>
         </section>
