@@ -691,6 +691,7 @@ const streamerProfiles = [
   { name: 'Chloë Panzer', login: 'chloepanzer', platform: 'Streamer', handle: '@chloepanzer', bio: "Hey, lovelies. I'm Chloë (umlaut optional), a little cat who loves weapons and military vehicles.", url: 'https://www.twitch.tv/chloepanzer' },
   { name: 'Skylord3098', login: 'skylord2098', platform: 'Streamer', handle: '@skylord2098', bio: "Hey I'm Skylord, your Texan timelord. I stream on Twitch every Friday and Saturday at 7:00pm CST.", url: 'https://www.twitch.tv/skylord2098' },
   { name: 'Zephie', login: 'zephiezephira', platform: 'Streamer', handle: '@zephiezephira', bio: 'Hi, I\'m Zephie, and I\'m a beginner vtuber! I\'m a variety streamer who enjoys community interaction. I have two requests for you: please be kind to me and other viewers, and have fun! Thanks!♡', url: 'https://www.twitch.tv/zephiezephira', discordUrl: 'https://discord.gg/gygUuUPQJW' },
+  { name: 'Testing10325', login: 'testing10325', platform: 'Streamer', handle: '@testing10325', bio: 'Visit Testing10325 on Twitch.', url: 'https://www.twitch.tv/testing10325' },
   { name: 'duhgobby', login: 'duhgobby', platform: 'Streamer', handle: '@duhgobby', bio: 'Just a damn goblin playing dumb games.', url: 'https://www.twitch.tv/duhgobby' },
 ];
 
@@ -992,7 +993,7 @@ const PatreonPage = ({ onNavigate }) => {
 
 export default function App() {
   const contactEmail = "contact@vixon.online";
-  const twitchChannel = "testing10325";
+  const twitchChannel = "vexoncore";
   const dubbyLink = 'https://www.dubby.gg/discount/VexonCore?ref=k4zlh7j1';
   const dubbyCouponCode = 'VexonCore';
   const [seasonalTheme, setSeasonalTheme] = useState(() => getSeasonalTheme(new Date()));
