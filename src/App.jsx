@@ -972,10 +972,15 @@ const CareersPage = ({ onNavigate }) => (
             <div className="mb-5 flex items-center gap-3 text-red-400"><Users2 size={22} /><span className="text-[10px] font-black uppercase tracking-[0.25em]">Twitch &amp; Discord // Moderation &amp; Administration</span></div>
             <h2 className="mb-3 text-2xl font-black uppercase italic text-white">Community moderation &amp; admin team</h2>
             <p className="mb-5 text-sm leading-7 text-gray-300">This team helps moderate and administer both our Twitch channel and Discord server. Responsibilities can include keeping chats and community spaces safe, supporting members, and helping manage day-to-day community operations.</p>
-            <p className="mb-6 border-l-2 border-red-600/60 pl-4 text-xs leading-6 text-gray-400">Apply here for Twitch and Discord moderator or administrator roles. Editor and creative production roles use the separate hiring process.</p>
-            <a href="https://dyno.gg/form/bf32115f" target="_blank" rel="noreferrer" className="mt-auto inline-flex w-fit items-center gap-2 rounded bg-red-600 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:bg-white hover:text-black">
-              Open Team Application <ExternalLink size={14} />
-            </a>
+            <p className="mb-6 border-l-2 border-red-600/60 pl-4 text-xs leading-6 text-gray-400">Joining our Discord server is required to apply and participate on the team. Apply here for Twitch and Discord moderator or administrator roles. Editor and creative production roles use the separate hiring process.</p>
+            <div className="mt-auto flex flex-wrap gap-3">
+              <a href="https://dyno.gg/form/bf32115f" target="_blank" rel="noreferrer" className="inline-flex w-fit items-center gap-2 rounded bg-red-600 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:bg-white hover:text-black">
+                Open Team Application <ExternalLink size={14} />
+              </a>
+              <a href="https://discord.gg/YUYhtgXZjw" target="_blank" rel="noreferrer" className="inline-flex w-fit items-center gap-2 rounded border border-red-600/40 bg-red-600/10 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-300 transition hover:bg-red-600 hover:text-white">
+                Join Our Discord <ExternalLink size={14} />
+              </a>
+            </div>
           </article>
 
           <article className="flex flex-col border border-red-600/25 bg-gradient-to-br from-red-950/35 to-[#0d0707] p-7 md:p-8">
