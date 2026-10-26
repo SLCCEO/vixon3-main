@@ -390,6 +390,7 @@ const Navbar = ({ currentPath, onNavigate }) => {
     { name: 'Streamers', href: '/streamers' },
     { name: 'Partners', href: '/partnerships' },
     { name: 'Staff', href: '/staff' },
+    { name: 'Join Our Team', href: '/careers' },
     { name: 'Patreon', href: '/patreon' },
     { name: 'Archives', href: '#archives' },
     { name: 'Contact', href: '#contact' }
@@ -940,7 +941,7 @@ const StaffPage = ({ onNavigate }) => {
       <section className="py-20 border-b border-red-600/10 bg-[radial-gradient(circle_at_top,_rgba(220,38,38,0.16),_transparent_60%)]">
         <div className="container mx-auto px-6">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-            <div><div className="mb-3 text-[10px] font-black uppercase tracking-[0.35em] text-red-500">Operations Deck</div><h1 className="text-5xl font-black uppercase italic tracking-tighter text-white">Staff_Page</h1></div>
+            <div><div className="mb-3 text-[10px] font-black uppercase tracking-[0.35em] text-red-500">Operations Deck</div><h1 className="text-5xl font-black uppercase italic tracking-tighter text-white">Staff_Page</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">Meet the people behind the VEXON community.</p></div>
             <button onClick={() => onNavigate('/')} className="rounded border border-red-600/30 bg-black/40 px-5 py-3 text-[10px] font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/10 hover:text-white">Return Home</button>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -952,6 +953,54 @@ const StaffPage = ({ onNavigate }) => {
     </div>
   );
 };
+
+const CareersPage = ({ onNavigate }) => (
+  <div className="pt-32 pb-24">
+    <section className="py-20 border-b border-red-600/10 bg-[radial-gradient(circle_at_top,_rgba(220,38,38,0.16),_transparent_60%)]">
+      <div className="container mx-auto px-6">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <div className="mb-3 text-[10px] font-black uppercase tracking-[0.35em] text-red-500">VEXON // Recruitment</div>
+            <h1 className="text-5xl font-black uppercase italic tracking-tighter text-white">Join Our Team</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">Explore opportunities to support our community or bring your creative skills to VEXON. Applications for general staff and production roles follow different processes.</p>
+          </div>
+          <button onClick={() => onNavigate('/')} className="rounded border border-red-600/30 bg-black/40 px-5 py-3 text-[10px] font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/10 hover:text-white">Return Home</button>
+        </div>
+
+        <div className="mb-12 grid gap-5 lg:grid-cols-2">
+          <article className="flex flex-col border border-red-600/25 bg-[#0d0707] p-7 md:p-8">
+            <div className="mb-5 flex items-center gap-3 text-red-400"><Users2 size={22} /><span className="text-[10px] font-black uppercase tracking-[0.25em]">Twitch &amp; Discord // Moderation &amp; Administration</span></div>
+            <h2 className="mb-3 text-2xl font-black uppercase italic text-white">Community moderation &amp; admin team</h2>
+            <p className="mb-5 text-sm leading-7 text-gray-300">This team helps moderate and administer both our Twitch channel and Discord server. Responsibilities can include keeping chats and community spaces safe, supporting members, and helping manage day-to-day community operations.</p>
+            <p className="mb-6 border-l-2 border-red-600/60 pl-4 text-xs leading-6 text-gray-400">Apply here for Twitch and Discord moderator or administrator roles. Editor and creative production roles use the separate hiring process.</p>
+            <a href="https://dyno.gg/form/bf32115f" target="_blank" rel="noreferrer" className="mt-auto inline-flex w-fit items-center gap-2 rounded bg-red-600 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:bg-white hover:text-black">
+              Open Team Application <ExternalLink size={14} />
+            </a>
+          </article>
+
+          <article className="flex flex-col border border-red-600/25 bg-gradient-to-br from-red-950/35 to-[#0d0707] p-7 md:p-8">
+            <div className="mb-5 flex items-center gap-3 text-red-400"><Video size={22} /><span className="text-[10px] font-black uppercase tracking-[0.25em]">Creative Production // Separate Hiring</span></div>
+            <h2 className="mb-3 text-2xl font-black uppercase italic text-white">Editors &amp; creative staff</h2>
+            <p className="mb-4 text-sm leading-7 text-gray-300">We recruit experienced video editors and other creative production staff, including thumbnail and graphics creators. These opportunities are reviewed separately from general community staff applications.</p>
+            <ol className="mb-6 space-y-2 text-xs leading-6 text-gray-300">
+              <li><span className="font-black text-red-400">01 //</span> Join the VEXON Discord and open a staff recruitment ticket.</li>
+              <li><span className="font-black text-red-400">02 //</span> Include the role you want, a portfolio or editing reel, relevant experience, and availability.</li>
+              <li><span className="font-black text-red-400">03 //</span> The team will review your work and follow up about next steps and expectations.</li>
+            </ol>
+            <a href="https://discord.gg/YUYhtgXZjw" target="_blank" rel="noreferrer" className="mt-auto inline-flex w-fit items-center gap-2 rounded border border-red-600/40 bg-red-600/10 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-300 transition hover:bg-red-600 hover:text-white">
+              Start Separate Hiring Process <ExternalLink size={14} />
+            </a>
+          </article>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 border border-red-600/20 bg-black/30 p-5 text-sm text-gray-300">
+          <span>Want to see the current team?</span>
+          <button onClick={() => onNavigate('/staff')} className="font-black text-red-400 transition hover:text-white">Meet the Staff <ChevronRight className="ml-1 inline" size={16} /></button>
+        </div>
+      </div>
+    </section>
+  </div>
+);
 
 const PatreonPage = ({ onNavigate }) => {
   const [members, setMembers] = useState([]);
@@ -1189,6 +1238,16 @@ export default function App() {
         <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
         <Navbar currentPath={currentPath} onNavigate={navigateTo} />
         <StaffPage onNavigate={navigateTo} />
+      </div>
+    );
+  }
+
+  if (currentPath === '/careers') {
+    return (
+      <div className="min-h-screen bg-[#0a0505] text-gray-200 selection:bg-red-600 selection:text-white font-mono">
+        <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
+        <Navbar currentPath={currentPath} onNavigate={navigateTo} />
+        <CareersPage onNavigate={navigateTo} />
       </div>
     );
   }
