@@ -3,7 +3,14 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/neural-override", "destination": "/index.html" },
     { "source": "/terms", "destination": "/index.html" },
-    { "source": "/privacy", "destination": "/index.html" }
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/lore", "destination": "/index.html" },
+    { "source": "/streamers", "destination": "/index.html" },
+    { "source": "/partnerships", "destination": "/index.html" },
+    { "source": "/staff", "destination": "/index.html" },
+    { "source": "/careers", "destination": "/index.html" },
+    { "source": "/patreon", "destination": "/index.html" }
   ]
 }
