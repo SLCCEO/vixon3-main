@@ -7,6 +7,29 @@ body {
   padding: 0;
 }
 
+.vinyl-record {
+  background:
+    radial-gradient(circle, transparent 0 25%, rgba(255, 255, 255, 0.06) 25.5%, transparent 26% 32%, rgba(255, 255, 255, 0.05) 32.5%, transparent 33% 40%, rgba(255, 255, 255, 0.05) 40.5%, transparent 41% 48%, rgba(255, 255, 255, 0.04) 48.5%, transparent 49% 56%, rgba(255, 255, 255, 0.04) 56.5%, transparent 57% 64%, rgba(255, 255, 255, 0.04) 64.5%, transparent 65% 72%, rgba(255, 255, 255, 0.04) 72.5%, transparent 73%),
+    radial-gradient(circle at 35% 30%, #292525, #080808 68%);
+}
+
+.vinyl-record.is-playing {
+  animation: vinyl-spin 3s linear infinite;
+}
+
+.record-tonearm {
+  transform: rotate(-24deg);
+  transition: transform 500ms ease;
+}
+
+.record-tonearm.record-tonearm-playing {
+  transform: rotate(4deg);
+}
+
+@keyframes vinyl-spin {
+  to { transform: rotate(360deg); }
+}
+
 html[data-season="new-year"] {
   --season-accent: #60a5fa;
   --season-wash: rgba(37, 99, 235, 0.18);
@@ -155,7 +178,12 @@ html[data-season] .bg-red-600 {
 @media (prefers-reduced-motion: reduce) {
   .birthday-celebration::before,
   .birthday-celebration::after,
-  .birthday-celebration-content {
+  .birthday-celebration-content,
+  .vinyl-record.is-playing {
     animation: none;
+  }
+
+  .record-tonearm {
+    transition: none;
   }
 }

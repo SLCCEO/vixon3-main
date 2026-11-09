@@ -7,13 +7,15 @@ import {
   Instagram, 
   Music, 
   Mail, 
-  Play, 
+  Github,
+  Play,
   Pause,
   ChevronRight,
   Menu,
   X,
   Zap,
   Cpu,
+  Layers,
   Terminal,
   Shield,
   Sword,
@@ -23,7 +25,6 @@ import {
   Send,
   Sparkles,
   Loader2,
-  RefreshCw,
   Activity,
   FileText,
   Target,
@@ -54,6 +55,16 @@ const getApiKey = () => {
 
 const apiKey = getApiKey();
 const liveDataRefreshMs = 5 * 60 * 1000;
+const musicTracks = Object.entries(import.meta.glob('/src/assets/music/*.{mp3,ogg,wav,m4a,aac,flac}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}))
+  .map(([path, src]) => ({
+    src,
+    title: decodeURIComponent(path.split('/').pop().replace(/\.[^.]+$/, '')).replace(/[-_]+/g, ' '),
+  }))
+  .sort((a, b) => a.title.localeCompare(b.title));
 
 const getEasterDate = (year) => {
   const a = year % 19;
@@ -341,6 +352,7 @@ const DossierSection = () => {
 const Navbar = ({ currentPath, onNavigate }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [networkMenuOpen, setNetworkMenuOpen] = useState(false);
   const logoClicks = useRef(0);
 
   useEffect(() => {
@@ -374,31 +386,37 @@ const Navbar = ({ currentPath, onNavigate }) => {
         targetElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
       setMobileMenuOpen(false);
+      setNetworkMenuOpen(false);
       return;
     }
 
     e.preventDefault();
     onNavigate(target);
     setMobileMenuOpen(false);
+    setNetworkMenuOpen(false);
   };
 
   const navLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Live', href: '#live' },
-    { name: 'Dossier', href: '#dossier' },
+    { name: 'Studio', href: '/studio' },
+    { name: 'Live', href: '/live' },
+    { name: 'Dossier', href: '/dossier' },
+    { name: 'Stats', href: '/stats' },
     { name: 'Lore', href: '/lore' },
     { name: 'Streamers', href: '/streamers' },
     { name: 'Partners', href: '/partnerships' },
     { name: 'Staff', href: '/staff' },
     { name: 'Join Our Team', href: '/careers' },
     { name: 'Patreon', href: '/patreon' },
-    { name: 'Archives', href: '#archives' },
-    { name: 'Contact', href: '#contact' }
+    { name: 'Archives', href: '/archives' },
+    { name: 'Contact', href: '/contact' }
   ];
+  const primaryNavLinks = navLinks.filter((link) => ['Home', 'Studio', 'Live', 'Dossier', 'Stats', 'Lore', 'Contact'].includes(link.name));
+  const networkLinks = navLinks.filter((link) => ['Streamers', 'Partners', 'Staff', 'Join Our Team', 'Patreon', 'Archives'].includes(link.name));
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-[#0a0505]/95 backdrop-blur-md py-3 border-b border-red-600/30' : 'bg-transparent py-6'}`}>
-      <div className="container mx-auto px-6 flex justify-between items-center">
+      <div className="container mx-auto px-6 flex justify-between items-center gap-6">
         <motion.div 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
@@ -406,23 +424,58 @@ const Navbar = ({ currentPath, onNavigate }) => {
           role="button"
           tabIndex={0}
           title="VEXON_SYS"
-          className="text-2xl font-black tracking-tighter text-red-500 italic flex items-center gap-2"
+          className="flex items-center gap-2 text-2xl font-black tracking-tighter text-red-500 italic"
         >
           <img src="/vexon-logo.png" alt="Vexon Studios" className="h-9 w-9 object-cover mix-blend-multiply" />
-          VEXON_SYS
+          <span className="flex flex-col leading-none">
+            VEXON_SYS
+            <span className="mt-1 hidden whitespace-nowrap font-mono text-[7px] font-bold tracking-[0.13em] text-gray-500 not-italic sm:block">// THE PRODUCTION &amp; TECH HOUSE FOR VEXONCORE</span>
+          </span>
         </motion.div>
 
-        <div className="hidden md:flex space-x-8">
-          {navLinks.map((link) => (
-            <a key={link.name} href={link.href} onClick={(e) => handleNavClick(e, link.href)} className="text-gray-400 hover:text-red-500 font-bold uppercase tracking-widest text-xs transition-colors">
+        <div className="hidden items-center gap-3 lg:flex">
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/5 px-2.5 py-1 font-mono text-[9px] font-bold tracking-wider text-emerald-400">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+            SYS: ONLINE
+          </div>
+          {primaryNavLinks.map((link) => (
+            <a key={link.name} href={link.href} onClick={(e) => handleNavClick(e, link.href)} className="border-b border-transparent py-2 text-[9px] font-bold uppercase tracking-wider text-gray-400 transition-all duration-300 hover:border-red-500 hover:text-red-400">
               [{link.name}]
             </a>
           ))}
+          <div className="relative">
+            <button type="button" aria-expanded={networkMenuOpen} aria-haspopup="true" onClick={() => setNetworkMenuOpen(!networkMenuOpen)} className="flex items-center gap-1 border-b border-transparent py-2 text-[9px] font-bold uppercase tracking-wider text-gray-400 transition-all duration-300 hover:border-red-500 hover:text-red-400">
+              [Network] <ChevronRight size={11} className={`transition-transform ${networkMenuOpen ? '-rotate-90' : 'rotate-90'}`} />
+            </button>
+            <AnimatePresence>
+              {networkMenuOpen && (
+                <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="absolute right-0 top-full z-50 mt-3 min-w-48 rounded-lg border border-red-600/25 bg-[#0a0505]/95 p-2 shadow-xl backdrop-blur-md">
+                  {networkLinks.map((link) => (
+                    <a key={link.name} href={link.href} onClick={(e) => handleNavClick(e, link.href)} className="block rounded px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-gray-400 transition-colors hover:bg-red-600/10 hover:text-red-300">
+                      {link.name}
+                    </a>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          <a href="https://www.twitch.tv/vexoncore" target="_blank" rel="noreferrer" aria-label="Watch VexonCore on Twitch" className="rounded border border-red-600/20 p-2 text-red-400 transition-all duration-300 hover:border-red-500 hover:bg-red-500/10 hover:text-white">
+            <Twitch size={15} />
+          </a>
         </div>
 
-        <button className="md:hidden text-red-500" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          {mobileMenuOpen ? <X /> : <Menu />}
-        </button>
+        <div className="flex items-center gap-3 lg:hidden">
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/5 px-2.5 py-1 font-mono text-[9px] font-bold tracking-wider text-emerald-400">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+            <span className="hidden sm:inline">SYS: ONLINE</span>
+          </div>
+          <a href="https://www.twitch.tv/vexoncore" target="_blank" rel="noreferrer" aria-label="Watch VexonCore on Twitch" className="rounded border border-red-600/20 p-2 text-red-400 transition-colors hover:border-red-500 hover:text-white">
+            <Twitch size={15} />
+          </a>
+          <button className="text-red-500" aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -431,7 +484,7 @@ const Navbar = ({ currentPath, onNavigate }) => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden bg-[#0a0505] border-b border-red-600/50 overflow-hidden"
+            className="lg:hidden bg-[#0a0505] border-b border-red-600/50 overflow-hidden"
           >
             <div className="flex flex-col p-6 space-y-4">
               {navLinks.map((link) => (
@@ -452,41 +505,6 @@ const Navbar = ({ currentPath, onNavigate }) => {
   );
 };
 
-const DiskReel = ({ title, type, color }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  return (
-    <div className="flex flex-col items-center group">
-      <div className="relative w-48 h-48 md:w-56 md:h-56">
-        <motion.div 
-          animate={{ rotate: isPlaying ? 360 : 0 }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-          className={`w-full h-full rounded-full border-4 border-red-900 shadow-[0_0_40px_rgba(220,38,38,0.2)] relative overflow-hidden bg-black flex items-center justify-center`}
-        >
-          <div className="absolute inset-0 opacity-40 border-[1px] border-red-500 rounded-full scale-95 border-dashed"></div>
-          <div className="absolute inset-0 opacity-10 border-[20px] border-white rounded-full scale-75"></div>
-          <div className={`w-24 h-24 rounded-full flex flex-col items-center justify-center z-10 border-2 border-red-500 bg-gradient-to-br ${color} shadow-[0_0_25px_rgba(220,38,38,0.6)]`}>
-             <Music size={24} className="text-white mb-1" />
-          </div>
-        </motion.div>
-
-        <button 
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="absolute inset-0 flex items-center justify-center bg-red-600/0 group-hover:bg-red-600/20 transition-all rounded-full"
-        >
-          <div className="bg-red-600 p-4 rounded-none shadow-[0_0_20px_#dc2626] transform scale-0 group-hover:scale-100 transition-all duration-300 hover:scale-110">
-            {isPlaying ? <Pause className="text-white fill-current" /> : <Play className="text-white fill-current" />}
-          </div>
-        </button>
-      </div>
-      <div className="mt-6 text-center">
-        <h3 className="text-xl font-black text-white tracking-tighter uppercase italic group-hover:text-red-500 transition-colors">{title}</h3>
-        <p className="text-red-900 uppercase tracking-[0.3em] text-[10px] font-bold mt-1">{type}</p>
-      </div>
-    </div>
-  );
-};
-
 const StatCard = ({ icon: Icon, label, value }) => (
   <motion.div 
     whileHover={{ y: -5, scale: 1.05 }}
@@ -500,6 +518,118 @@ const StatCard = ({ icon: Icon, label, value }) => (
     <span className="text-[10px] font-black text-red-700 mt-1 uppercase tracking-[0.2em]">{label}</span>
   </motion.div>
 );
+
+const formatAudioTime = (seconds) => {
+  if (!Number.isFinite(seconds)) return '0:00';
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${minutes}:${remainingSeconds}`;
+};
+
+const VinylRecord = ({ track }) => {
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [playbackError, setPlaybackError] = useState('');
+
+  useEffect(() => {
+    const pauseForOtherTrack = (event) => {
+      if (event.detail !== audioRef.current) {
+        audioRef.current?.pause();
+      }
+    };
+    window.addEventListener('archive-audio-play', pauseForOtherTrack);
+    return () => window.removeEventListener('archive-audio-play', pauseForOtherTrack);
+  }, []);
+
+  const togglePlayback = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (audio.paused) {
+      window.dispatchEvent(new CustomEvent('archive-audio-play', { detail: audio }));
+      setPlaybackError('');
+      try {
+        await audio.play();
+      } catch (error) {
+        console.error(`Unable to play archive track "${track.title}"`, error);
+        setPlaybackError('Playback failed. Try again or check this audio file.');
+      }
+    } else {
+      audio.pause();
+    }
+  };
+
+  return (
+    <article className="group rounded-2xl border border-red-600/20 bg-background/40 p-6 backdrop-blur-md transition-all duration-300 hover:border-red-500/50">
+      <div className="flex flex-col items-center gap-6 sm:flex-row">
+        <div className="relative flex h-52 w-52 shrink-0 items-center justify-center">
+          <div className={`vinyl-record relative h-48 w-48 rounded-full border border-white/10 shadow-[0_0_30px_rgba(220,38,38,0.12)] ${isPlaying ? 'is-playing' : ''}`}>
+            <div className="absolute inset-[28%] flex items-center justify-center rounded-full border border-red-300/30 bg-[radial-gradient(circle_at_35%_30%,#7f1d1d,#200808_72%)] shadow-[0_0_18px_rgba(220,38,38,0.25)]">
+              <div className="max-w-[72%] truncate text-center font-mono text-[9px] font-black uppercase tracking-wider text-red-100">{track.title}</div>
+              <span className="absolute h-2 w-2 rounded-full border border-red-100/70 bg-black" />
+            </div>
+            <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,transparent_0_26%,rgba(255,255,255,0.06)_26.5%,transparent_27%,transparent_34%,rgba(255,255,255,0.05)_34.5%,transparent_35%,transparent_42%,rgba(255,255,255,0.05)_42.5%,transparent_43%,transparent_50%,rgba(255,255,255,0.04)_50.5%,transparent_51%,transparent_58%,rgba(255,255,255,0.04)_58.5%,transparent_59%,transparent_66%,rgba(255,255,255,0.04)_66.5%,transparent_67%,transparent_74%,rgba(255,255,255,0.04)_74.5%,transparent_75%)]" />
+            <button type="button" onClick={togglePlayback} aria-label={`${isPlaying ? 'Pause' : 'Play'} ${track.title}`} className="absolute inset-0 z-10 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400">
+              <span className="sr-only">{isPlaying ? 'Pause' : 'Play'} {track.title}</span>
+            </button>
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center text-white opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="rounded-full bg-black/70 p-3">{isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}</span>
+            </div>
+          </div>
+          <div className={`record-tonearm pointer-events-none absolute right-0 top-3 z-20 h-24 w-1 origin-top rounded-full bg-gradient-to-b from-gray-200 via-gray-400 to-red-500 shadow-[0_0_8px_rgba(255,255,255,0.15)] ${isPlaying ? 'record-tonearm-playing' : ''}`}>
+            <span className="absolute -bottom-1 -left-1 h-3 w-3 rounded-sm border border-gray-500 bg-gray-300" />
+          </div>
+        </div>
+
+        <div className="w-full min-w-0 flex-1">
+          <div className="mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-red-500">VexonCore // Audio Archive</div>
+          <h3 className="mb-5 break-words text-xl font-black uppercase italic tracking-tight text-white">{track.title}</h3>
+          <audio
+            ref={audioRef}
+            preload="metadata"
+            src={track.src}
+            onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+            onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
+            onError={() => setPlaybackError('This audio file could not be loaded.')}
+          />
+          <label className="sr-only" htmlFor={`seek-${track.src}`}>Seek {track.title}</label>
+          <input
+            id={`seek-${track.src}`}
+            type="range"
+            min="0"
+            max={duration || 0}
+            step="0.1"
+            value={Math.min(currentTime, duration || 0)}
+            disabled={!duration}
+            onChange={(event) => {
+              const nextTime = Number(event.target.value);
+              if (audioRef.current) audioRef.current.currentTime = nextTime;
+              setCurrentTime(nextTime);
+            }}
+            className="h-1.5 w-full cursor-pointer accent-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+          />
+          <div className="mt-2 flex justify-between font-mono text-[9px] text-gray-500">
+            <span>{formatAudioTime(currentTime)}</span>
+            <span>{formatAudioTime(duration)}</span>
+          </div>
+          <div className="mt-5 flex items-center gap-3">
+            <button type="button" onClick={togglePlayback} className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-red-200 transition-colors hover:bg-red-600 hover:text-white">
+              {isPlaying ? <Pause size={13} /> : <Play size={13} />}
+              {isPlaying ? 'Pause Record' : 'Play Record'}
+            </button>
+            <span className="font-mono text-[9px] uppercase tracking-widest text-gray-600">{isPlaying ? 'Now playing' : 'On the turntable'}</span>
+          </div>
+          {playbackError && <p role="alert" className="mt-3 text-xs text-red-300">{playbackError}</p>}
+        </div>
+      </div>
+    </article>
+  );
+};
 
 const NeuralOverridePage = ({ onNavigate }) => {
   const [phase, setPhase] = useState('login');
@@ -883,7 +1013,7 @@ const PartnershipsPage = ({ dubbyLink, dubbyCouponCode, onNavigate }) => (
                 <p className="mb-4 text-sm leading-6 text-gray-300">Let&apos;s create something distinct. Reach out to request a media kit or pitch a custom collaboration.</p>
                 <div className="flex flex-wrap gap-3">
                   <a href="https://www.twitch.tv/vexoncore" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded border border-red-600/30 bg-red-600/10 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 transition hover:bg-red-600/20 hover:text-white"><Twitch size={14} /> Twitch</a>
-                  <a href="mailto:contact@vixon.online?subject=VEXON%20partnership%20inquiry" className="inline-flex items-center gap-2 rounded border border-red-600/30 bg-red-600/10 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 transition hover:bg-red-600/20 hover:text-white"><Mail size={14} /> Business inquiries</a>
+                  <a href="mailto:contact@vixon.online?subject=VexonStudio%20partnership%20inquiry" className="inline-flex items-center gap-2 rounded border border-red-600/30 bg-red-600/10 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 transition hover:bg-red-600/20 hover:text-white"><Mail size={14} /> Business inquiries</a>
                 </div>
               </div>
             </div>
@@ -1057,7 +1187,9 @@ export default function App() {
   const dubbyCouponCode = 'VexonCore';
   const [seasonalTheme, setSeasonalTheme] = useState(() => getSeasonalTheme(new Date()));
   const socialProfiles = {
+    github: 'https://github.com/VexonStudio',
     twitch: 'https://www.twitch.tv/vexoncore',
+    discord: 'https://discord.gg/YUYhtgXZjw',
     youtube: 'https://www.youtube.com/@VixonOfficial',
     tiktok: 'https://www.tiktok.com/@jeremiah_yt_official',
     x: 'https://x.com/VixonOfficial',
@@ -1080,10 +1212,6 @@ export default function App() {
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
-
-  const [trackPrompt, setTrackPrompt] = useState('');
-  const [generatedTrack, setGeneratedTrack] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const refreshSeason = () => {
@@ -1180,15 +1308,6 @@ export default function App() {
     setIsTyping(false);
   };
 
-  const generateTrackConcept = async () => {
-    if (!trackPrompt.trim() || isGenerating) return;
-    setIsGenerating(true);
-    const prompt = `Generate Phonk concept: "${trackPrompt}". Title and 2-sentence breakdown.`;
-    const result = await callGemini(prompt, "Professional Phonk producer.");
-    setGeneratedTrack(result);
-    setIsGenerating(false);
-  };
-
   if (currentPath === '/neural-override') {
     return (
       <div className="min-h-screen bg-black text-gray-200 selection:bg-red-600 selection:text-white font-mono">
@@ -1267,13 +1386,32 @@ export default function App() {
     );
   }
 
+  const pageTitles = {
+    '/studio': ['VexonStudio', 'Production, engineering, and the systems powering the Vexon ecosystem.'],
+    '/live': ['Live Transmission', 'Watch the broadcast and connect through the live channel.'],
+    '/dossier': ['Vexon Dossier', 'Creator identity, field intel, and operational protocols.'],
+    '/stats': ['Live Statistics', 'Creator and community telemetry from connected platforms.'],
+    '/archives': ['Media Archives', 'Audio and creative transmissions from VexonCore.'],
+    '/contact': ['Operations Dispatch', 'Professional inquiries and community connections.'],
+  };
+  const currentPageTitle = pageTitles[currentPath];
   return (
     <div className="min-h-screen bg-[#0a0505] text-gray-200 selection:bg-red-600 selection:text-white font-mono">
       <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
       
       <Navbar currentPath={currentPath} onNavigate={navigateTo} />
 
-      <section id="home" className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+      {currentPageTitle && (
+        <section className="border-b border-red-600/15 bg-[radial-gradient(ellipse_at_top,_rgba(220,38,38,0.12),_transparent_60%)] pb-12 pt-36">
+          <div className="container mx-auto px-6">
+            <div className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-500">VexonCore // System Page</div>
+            <h1 className="text-4xl font-black uppercase italic tracking-tight text-white md:text-6xl">{currentPageTitle[0]}</h1>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-400">{currentPageTitle[1]}</p>
+          </div>
+        </section>
+      )}
+
+      {currentPath === '/' && <section id="home" className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a0a0a_1px,transparent_1px),linear-gradient(to_bottom,#1a0a0a_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
         <div className="container mx-auto px-6 relative z-10">
           <div className="relative mb-12 h-[220px] overflow-hidden border-2 border-red-600/50 bg-[#0d0707] shadow-[0_0_50px_rgba(220,38,38,0.15)] md:h-[360px]">
@@ -1282,32 +1420,165 @@ export default function App() {
           </div>
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }}>
             <div className="flex items-center gap-3 mb-6">
-              <span className="px-2 py-0.5 bg-red-600 text-[10px] font-black text-white uppercase italic">Active</span>
-              <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.2em]">Model: Protogen // Wolf // Male</span>
+              <span className="px-2 py-0.5 bg-red-600 text-[10px] font-black text-white uppercase italic">VexonStudio // Online</span>
+              <span className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-red-500">Independent Media // Live Broadcast</span>
             </div>
             <h1 className="text-7xl md:text-9xl font-black leading-[0.8] mb-8 tracking-tighter italic uppercase">
               VEXON<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900 drop-shadow-[0_0_20px_rgba(220,38,38,0.4)]">CORE</span>
             </h1>
-            <p className="text-lg text-gray-400 mb-10 max-w-lg leading-relaxed border-l-4 border-red-600 pl-6 bg-red-600/5 py-4">
-              A creator-first system built around live presence, sharp visuals, and a relentless digital identity tuned for streams, music, and motion.
+            <p className="text-lg text-gray-300 mb-6 max-w-2xl leading-relaxed border-l-4 border-red-600 pl-6 bg-red-600/5 py-4">
+              VexonStudio is an independent digital media production house and creative hub powering live entertainment, gaming content, and community-driven experiences.
+            </p>
+            <p className="mb-8 max-w-2xl text-sm leading-7 text-gray-500">
+              At the intersection of streaming, custom digital assets, and broadcast and media production, we bring Vexon&apos;s creative vision to life.
             </p>
             <p className="mb-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-red-500/80">
               <img src="/vexon-logo.png" alt="" className="h-5 w-5 object-cover mix-blend-multiply" />
               Signal hint: the VEXON_SYS mark hides a classified override.
             </p>
             <div className="flex flex-wrap gap-4">
-              <a href="#live" className="bg-red-600 text-white px-10 py-5 font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all flex items-center border-b-4 border-red-900">
+              <a href="/studio" onClick={(e) => handleNavClick(e, '/studio')} className="border border-red-600/40 bg-black/30 px-8 py-5 font-black uppercase tracking-widest text-red-400 transition-all hover:border-red-500 hover:bg-red-600/10 hover:text-white">
+                EXPLORE_STUDIO
+              </a>
+              <a href="/live" onClick={(e) => handleNavClick(e, '/live')} className="bg-red-600 text-white px-10 py-5 font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all flex items-center border-b-4 border-red-900">
                 LIVE_FEED <Radio size={18} className="ml-2 animate-pulse" />
               </a>
-              <a href="#dossier" className="border border-red-600/40 bg-black/30 px-8 py-5 font-black uppercase tracking-widest text-red-400 hover:bg-red-600/10 transition-all">
+              <a href="/dossier" onClick={(e) => handleNavClick(e, '/dossier')} className="border border-red-600/40 bg-black/30 px-8 py-5 font-black uppercase tracking-widest text-red-400 hover:bg-red-600/10 transition-all">
                 VIEW_DOSSIER
               </a>
             </div>
           </motion.div>
         </div>
-      </section>
+      </section>}
 
-      <section id="seasonal-update" className="seasonal-notice border-y py-12">
+      {currentPath === '/studio' && <section id="studio" className="border-y border-red-600/15 bg-[#0c0606] py-24">
+        <div className="container mx-auto space-y-14 px-6">
+          <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="rounded-2xl border border-red-600/25 bg-background/40 p-8 shadow-[0_0_40px_rgba(220,38,38,0.06)] backdrop-blur-md md:p-10">
+              <div className="mb-4 flex items-center gap-2 font-mono text-[10px] font-black uppercase tracking-[0.3em] text-red-400">
+                <Cpu size={15} /> VexonStudio // Production House
+              </div>
+              <h2 className="mb-5 text-4xl font-black uppercase italic tracking-tight text-white md:text-5xl">Built for the signal.</h2>
+              <p className="max-w-3xl text-sm leading-7 text-gray-300">
+                VexonStudio is an independent digital media production house and creative hub dedicated to powering live entertainment, gaming content, and community-driven experiences. Operating at the intersection of streaming, custom digital assets, and broadcast and media production, the studio brings Vexon&apos;s creative vision to life across every channel.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-2">
+                {['React', 'TypeScript', 'Tailwind', 'Supabase', 'Vercel'].map((stack) => (
+                  <span key={stack} className="rounded-full border border-red-500/30 bg-red-500/5 px-3 py-1.5 font-mono text-[10px] font-bold text-red-300 transition-colors hover:border-red-400 hover:bg-red-500/15">{stack}</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-red-600/20 bg-background/40 p-8 backdrop-blur-md">
+              <div className="mb-6 flex items-center gap-3">
+                <Terminal size={18} className="text-red-400" />
+                <h3 className="text-xl font-black uppercase italic text-white">Studio Capabilities</h3>
+              </div>
+              <div className="space-y-4">
+                {[
+                  ['01', 'Frontend Engineering', 'Responsive web architecture, interface systems, and brand-led UI.'],
+                  ['02', 'API Integrations', 'Creator services, live telemetry, and connected backend workflows.'],
+                  ['03', 'Automated Tooling', 'Community bots, operational commands, and broadcast support systems.'],
+                ].map(([index, title, description]) => (
+                  <div key={index} className="border-l border-red-500/40 pl-4">
+                    <div className="font-mono text-[9px] font-bold tracking-widest text-red-500">{index} // CAPABILITY</div>
+                    <h4 className="mt-1 text-sm font-bold uppercase tracking-wide text-white">{title}</h4>
+                    <p className="mt-1 text-xs leading-5 text-gray-400">{description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-500">Engineering Divisions</div>
+                <h3 className="text-3xl font-black uppercase italic text-white md:text-4xl">Studio project portfolio</h3>
+              </div>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-gray-500">Portfolio // 2026</span>
+            </div>
+            <div className="grid gap-5 lg:grid-cols-3">
+              {[
+                {
+                  sector: 'Web Architecture & UI',
+                  title: 'VexonCore Digital Platform',
+                  description: 'The central brand destination for live broadcasts, creator updates, community access, and real-time social telemetry.',
+                  status: 'DEPLOYED',
+                  stack: ['React', 'Tailwind', 'Vercel'],
+                  icon: Layers,
+                },
+                {
+                  sector: 'Interactive Systems',
+                  title: 'Community Operations Suite',
+                  description: 'A connected Discord operations suite combining command systems and service integrations for moderation, staff workflows, and community features.',
+                  status: 'ACTIVE',
+                  stack: ['Node.js', 'Discord API', 'Supabase'],
+                  icon: Activity,
+                },
+                {
+                  sector: 'Broadcast Operations',
+                  title: 'Live Signal Toolkit',
+                  description: 'Broadcast tooling for stream identity, live-status integrations, stream-sync workflows, and automated community dispatch.',
+                  status: 'ACTIVE',
+                  stack: ['Twitch', 'React', 'Automation'],
+                  icon: Radio,
+                },
+                {
+                  sector: 'Autonomous Creator Intelligence',
+                  title: 'VEXARA — Autonomous VTuber Intelligence',
+                  description: 'A project draft for an autonomous VTuber built to observe, understand, decide, act, and adapt—connecting conversation, memory, voice, vision, avatar control, games, and streaming.',
+                  status: 'IN DEVELOPMENT',
+                  details: ['VX-AI-01 Core', 'Personality Engine', 'Memory Engine', 'Voice Engine', 'Vision Engine', 'Avatar Engine', 'Game Agent', 'Streaming Agent'],
+                  stack: ['AI / Local Models', 'STT / TTS', 'Twitch', 'Discord', 'YouTube'],
+                  icon: Sparkles,
+                },
+                {
+                  sector: 'Core Platform Architecture',
+                  title: 'VEXON OS',
+                  description: 'A proposed operations platform pairing a web dashboard with a Node.js / TypeScript Core API over HTTPS and WebSocket, coordinating AI, voice, memory, and creator-service integrations.',
+                  status: 'IN DEVELOPMENT',
+                  details: ['AI Provider Adapters', 'STT / TTS Providers', 'SQLite + Vector Memory', 'Twitch · Discord · GitHub', 'Proxmox · OBS'],
+                  stack: ['Node.js', 'TypeScript', 'HTTPS / WebSocket', 'SQLite', 'Vector DB'],
+                  icon: Cpu,
+                },
+              ].map((project) => {
+                const Icon = project.icon;
+                const statusClasses = {
+                  DEPLOYED: 'border-emerald-500/30 bg-emerald-500/5 text-emerald-400',
+                  ACTIVE: 'border-red-500/30 bg-red-500/5 text-red-300',
+                  'IN DEVELOPMENT': 'border-amber-400/30 bg-amber-400/5 text-amber-300',
+                };
+                return (
+                  <article key={project.title} className="group relative overflow-hidden rounded-xl border border-red-600/15 bg-background/40 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-red-500/50 hover:bg-red-950/20">
+                    <div className="absolute left-0 top-0 h-5 w-5 border-l border-t border-transparent transition-colors group-hover:border-red-500" />
+                    <div className="mb-6 flex items-center justify-between gap-3">
+                      <Icon size={20} className="text-red-400" />
+                      <span className={`rounded-full border px-2.5 py-1 font-mono text-[9px] font-bold tracking-wider ${statusClasses[project.status]}`}>{project.status}</span>
+                    </div>
+                    <div className="mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-red-400">{project.sector}</div>
+                    <h4 className="mb-3 text-lg font-black uppercase text-white">{project.title}</h4>
+                    <p className="min-h-[84px] text-xs leading-6 text-gray-400">{project.description}</p>
+                    {project.details && (
+                      <div className="mt-4 border-t border-red-600/10 pt-4">
+                        <div className="mb-2 font-mono text-[9px] font-bold uppercase tracking-widest text-gray-500">Proposed Systems</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {project.details.map((detail) => <span key={detail} className="rounded border border-white/5 bg-black/20 px-2 py-1 font-mono text-[8px] text-gray-400">{detail}</span>)}
+                        </div>
+                      </div>
+                    )}
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {project.stack.map((item) => <span key={item} className="rounded-full border border-white/10 px-2.5 py-1 font-mono text-[9px] text-gray-300">{item}</span>)}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>}
+
+      {currentPath === '/' && <section id="seasonal-update" className="seasonal-notice border-y py-12">
         <div className="container mx-auto flex flex-wrap items-center justify-between gap-6 px-6">
           <div>
             <div className="seasonal-notice-label mb-3 flex items-center gap-2">
@@ -1321,9 +1592,9 @@ export default function App() {
             Event Updates <ExternalLink size={14} className="ml-2 inline" />
           </a>
         </div>
-      </section>
+      </section>}
 
-      {birthdayMonthActive && (
+      {currentPath === '/' && birthdayMonthActive && (
         <section id="birthday-celebration" className="birthday-celebration relative isolate overflow-hidden border-y border-pink-400/40 py-12">
           <div className="birthday-celebration-content container relative z-10 mx-auto flex flex-wrap items-center justify-between gap-6 px-6">
             <div>
@@ -1332,7 +1603,7 @@ export default function App() {
                 <span className="text-[10px] font-black uppercase tracking-[0.3em]">Birthday Month // November</span>
               </div>
               <h2 className="mb-2 text-3xl font-black uppercase italic text-white">Birthday Incoming: November 29</h2>
-              <p className="max-w-2xl text-sm leading-6 text-gray-200">It&apos;s my birthday month! My birthday is November 29. Come by my Twitch chat any time this month and wish me a happy birthday!</p>
+              <p className="max-w-2xl text-sm leading-6 text-gray-200">The VexonCore creator celebrates a birthday on November 29. Join the live channel this month to send a message and celebrate with the community.</p>
             </div>
             <a href="https://www.twitch.tv/vexoncore" target="_blank" rel="noreferrer" className="birthday-celebration-link rounded px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition">
               Wish Me Happy Birthday <Twitch size={14} className="ml-2 inline" />
@@ -1341,7 +1612,7 @@ export default function App() {
         </section>
       )}
 
-      <section id="live" className="py-24 relative bg-black border-y border-red-900/30">
+      {currentPath === '/live' && <section id="live" className="py-24 relative bg-black border-y border-red-900/30">
         <div className="container mx-auto px-6">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -1363,9 +1634,9 @@ export default function App() {
             )}
           </div>
         </div>
-      </section>
+      </section>}
 
-      <section id="dossier" className="py-24 bg-black relative">
+      {currentPath === '/dossier' && <section id="dossier" className="py-24 bg-black relative">
         <div className="container mx-auto px-6">
           <div className="mb-12">
             <h2 className="text-5xl font-black uppercase italic text-white tracking-tighter">VEXON_DOSSIER</h2>
@@ -1373,45 +1644,9 @@ export default function App() {
           </div>
           <DossierSection />
         </div>
-      </section>
+      </section>}
 
-      <section id="lore-preview" className="py-20 bg-[#0c0606] border-y border-red-600/10">
-        <div className="container mx-auto px-6">
-          <div className="rounded border border-red-600/20 bg-[#0d0707] p-8 shadow-[0_0_30px_rgba(220,38,38,0.08)]">
-            <div className="mb-4 flex items-center gap-2 text-red-400">
-              <BookOpen size={18} />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Lore Archive</span>
-            </div>
-            <h2 className="mb-3 text-3xl font-black uppercase italic text-white">Lore_Ready</h2>
-            <p className="max-w-3xl text-sm leading-7 text-gray-300">
-              The lore experience now lives on its own route, while the homepage stays centered on live streaming, dossier intel, and the core creator experience.
-            </p>
-            <button onClick={() => navigateTo('/lore')} className="mt-6 rounded border border-red-600/30 bg-red-600/10 px-5 py-3 text-sm font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/20 hover:text-white">
-              Enter Lore Page
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section id="partners-preview" className="py-20 bg-black border-b border-red-600/10">
-        <div className="container mx-auto px-6">
-          <div className="rounded border border-red-600/20 bg-gradient-to-br from-red-600/10 to-black/30 p-8">
-            <div className="mb-4 flex items-center gap-2 text-red-400">
-              <Handshake size={18} />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Official Network</span>
-            </div>
-            <h2 className="mb-3 text-3xl font-black uppercase italic text-white">Partnerships_Ready</h2>
-            <p className="max-w-3xl text-sm leading-7 text-gray-300">
-              The VEXON partner experience now lives on its own page, while the homepage stays focused on live streaming, lore, and the creator experience.
-            </p>
-            <button onClick={() => navigateTo('/partnerships')} className="mt-6 rounded border border-red-600/30 bg-red-600/10 px-5 py-3 text-sm font-black uppercase tracking-[0.25em] text-red-400 transition hover:bg-red-600/20 hover:text-white">
-              Enter Partner Page
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section id="stats" className="py-20 border-y border-red-600/20 bg-red-950/5">
+      {currentPath === '/stats' && <section id="stats" className="py-20 border-y border-red-600/20 bg-red-950/5">
         <div className="container mx-auto px-6">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -1429,9 +1664,9 @@ export default function App() {
             <StatCard icon={Shield} label="Discord Members" value={socialStats.discordMembers === null ? '—' : `${toCompactNumber(socialStats.discordMembers)}+`} />
           </div>
         </div>
-      </section>
+      </section>}
 
-      <section id="spec" className="py-24 bg-[#0c0606] border-y border-red-600/10">
+      {currentPath === '/dossier' && <section id="spec" className="py-24 bg-[#0c0606] border-y border-red-600/10">
         <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12">
           <div className="space-y-8">
             <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter">The_Unit</h2>
@@ -1482,90 +1717,85 @@ export default function App() {
              </form>
           </div>
         </div>
-      </section>
+      </section>}
 
-      <section id="archives" className="py-24 bg-black">
+      {currentPath === '/archives' && <section id="archives" className="py-24 bg-black">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-6xl font-black uppercase italic text-white tracking-tighter mb-4 underline decoration-red-600">Archives</h2>
-            <div className="grid md:grid-cols-3 gap-12 mt-12">
-              <DiskReel title="Phonk_Mix_01" type="High_Frequency" color="from-red-900 to-black" />
-              <DiskReel title="Katana_VFX" type="Combat_Log" color="from-red-600 to-red-950" />
-              <DiskReel title="Glitch_Core" type="Experimental" color="from-gray-900 to-black" />
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-10 flex items-center gap-3">
+              <Music size={22} className="text-red-500" />
+              <div>
+                <h2 className="text-2xl font-black uppercase italic text-white">Music Library</h2>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-gray-500">Supported: MP3, OGG, WAV, M4A, AAC, FLAC</p>
+              </div>
             </div>
-          </div>
-
-          <div className="max-w-4xl mx-auto bg-red-950/10 border border-red-600/30 p-8">
-             <div className="flex items-center gap-3 mb-6">
-                <Sparkles size={24} className="text-red-500" />
-                <h3 className="text-2xl font-black italic uppercase text-white tracking-tighter">✨ Sync_Track_Concept</h3>
-             </div>
-             <div className="flex flex-col md:flex-row gap-4">
-                <input 
-                  value={trackPrompt}
-                  onChange={(e) => setTrackPrompt(e.target.value)}
-                  placeholder="Describe a vibe (e.g. 'Night drive in Neo-Tokyo')" 
-                  className="flex-1 bg-black border border-gray-800 p-4 text-sm outline-none focus:border-red-600"
-                />
-                <button 
-                  onClick={generateTrackConcept}
-                  disabled={isGenerating}
-                  className="bg-red-600 text-white px-8 py-4 font-black uppercase text-xs hover:bg-white hover:text-black transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-                  Execute_Sync
-                </button>
-             </div>
-             {generatedTrack && (
-               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8 p-6 bg-black/80 border-l-4 border-red-600 font-mono text-sm leading-relaxed">
-                  <div className="text-red-600 font-black mb-2 italic uppercase underline tracking-widest">TRANSMISSION_RESULT:</div>
-                  <pre className="whitespace-pre-wrap text-gray-300">{generatedTrack}</pre>
-               </motion.div>
-             )}
+            {musicTracks.length ? (
+              <div className="space-y-4">
+                {musicTracks.map((track) => (
+                  <VinylRecord key={track.src} track={track} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-red-600/30 bg-background/40 p-8 text-center backdrop-blur-md">
+                <Music size={26} className="mx-auto mb-4 text-red-500" />
+                <h3 className="mb-2 text-lg font-black uppercase text-white">No audio files yet</h3>
+                <p className="text-sm leading-6 text-gray-400">
+                  Add MP3, OGG, WAV, M4A, AAC, or FLAC files to <code className="font-mono text-red-300">src/assets/music</code>, then restart the dev server or rebuild the site.
+                </p>
+              </div>
+            )}
           </div>
         </div>
-      </section>
+      </section>}
 
-      <section id="contact" className="py-24">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+      {currentPath === '/contact' && <section id="contact" className="py-24">
+        <div className="container mx-auto grid items-center gap-8 px-6 lg:grid-cols-2">
           <div>
-            <h2 className="text-6xl font-black mb-6 uppercase italic text-white tracking-tighter">SYNC_UP</h2>
-            <a href={`mailto:${contactEmail}`} className="group flex items-center space-x-6 bg-red-600/5 p-4 border border-transparent hover:border-red-600 transition-all">
+            <div className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-500">VexonStudio // Professional Contact</div>
+            <h2 className="mb-4 text-5xl font-black uppercase italic tracking-tighter text-white md:text-6xl">Operations Dispatch</h2>
+            <p className="mb-7 max-w-xl text-sm leading-7 text-gray-400">For engineering, production, and collaboration inquiries, route a dispatch to the studio or connect with the community hub.</p>
+            <a href={`mailto:${contactEmail}`} className="group flex items-center space-x-6 rounded-xl border border-red-600/20 bg-background/40 p-4 backdrop-blur-md transition-all hover:border-red-500/60">
               <div className="bg-red-600 p-4 shadow-[0_0_15px_rgba(220,38,38,0.3)]"><Mail size={24} className="text-white"/></div>
               <div>
-                <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest italic">Direct_Channel</div>
+                <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-gray-500">Direct_Studio_Channel</div>
                 <div className="text-xl md:text-2xl font-black text-white group-hover:text-red-500 transition-colors uppercase italic">{contactEmail}</div>
               </div>
             </a>
+            <a href={socialProfiles.discord} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-3 rounded-lg border border-red-600/20 bg-background/40 px-5 py-4 font-mono text-xs font-bold uppercase tracking-wider text-gray-200 backdrop-blur-md transition-all hover:border-red-500/60 hover:text-white">
+              <MessageSquare size={17} className="text-red-400" /> Community Dispatch // VEXONVT_TV <ExternalLink size={13} />
+            </a>
           </div>
-          <form className="bg-[#120a0a] border border-red-900/50 p-10 relative">
-            <div className="space-y-6">
-              <input placeholder="IDENTITY_REQUIRED" className="w-full bg-black border border-gray-800 text-white p-4 focus:border-red-600 outline-none" />
-              <textarea placeholder="INPUT_PAYLOAD..." rows="4" className="w-full bg-black border border-gray-800 text-white p-4 focus:border-red-600 outline-none resize-none"></textarea>
-              <button className="flex w-full items-center justify-center bg-white py-5 font-black uppercase tracking-[0.2em] text-black transition-all hover:bg-red-600 hover:text-white">
-                SEND_ENCRYPTED <ChevronRight size={18} />
-              </button>
+          <div className="rounded-2xl border border-red-600/20 bg-background/40 p-8 backdrop-blur-md md:p-10">
+            <div className="mb-6 flex items-center gap-3">
+              <Shield size={20} className="text-red-400" />
+              <h3 className="font-mono text-sm font-black uppercase tracking-wider text-white">Dispatch Protocol</h3>
             </div>
-          </form>
+            <p className="mb-7 text-sm leading-7 text-gray-400">Use the direct studio email for professional requests. Community support and live updates are available through the VexonCore Discord hub.</p>
+            <a href={`mailto:${contactEmail}`} className="inline-flex items-center gap-2 rounded bg-red-600 px-5 py-3 font-mono text-[10px] font-black uppercase tracking-[0.2em] text-white transition-colors hover:bg-white hover:text-black">Open Email Channel <ChevronRight size={15} /></a>
+            <div className="mt-7 border-t border-red-600/15 pt-5 font-mono text-[9px] uppercase tracking-widest text-gray-500">Response routing // Studio Operations</div>
+          </div>
         </div>
-      </section>
+      </section>}
 
       <footer className="py-12 border-t border-red-900/20 bg-black">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-gray-700 text-[9px] font-bold uppercase tracking-[0.4em]">
-            <p>© 2025 // VEXON_PROTOCOL // SYS_VERSION_4.2.0</p>
+        <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-6 md:flex-row">
+          <div className="font-mono text-center text-[10px] leading-6 text-gray-500 md:text-left">
+            <p>© 2026 VexonStudio. All rights reserved. The digital ecosystem and production hub of Vexon.</p>
           </div>
-          <div className="flex space-x-8 text-red-600">
-            <a href={socialProfiles.x} target="_blank" rel="noreferrer" aria-label="X"><Twitter size={16} className="transition-colors hover:text-white" /></a>
-            <a href={socialProfiles.twitch} target="_blank" rel="noreferrer" aria-label="Twitch"><Twitch size={16} className="transition-colors hover:text-white" /></a>
-            <a href={socialProfiles.youtube} target="_blank" rel="noreferrer" aria-label="YouTube"><Youtube size={16} className="transition-colors hover:text-white" /></a>
-            <a href={socialProfiles.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok"><Music size={16} className="transition-colors hover:text-white" /></a>
-            <a href={socialProfiles.instagram} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={16} className="transition-colors hover:text-white" /></a>
+          <div className="flex items-center gap-6 text-red-400">
+            <a href={socialProfiles.github} target="_blank" rel="noreferrer" aria-label="VexonStudio on GitHub" className="transition-colors hover:text-white"><Github size={17} /></a>
+            <a href={socialProfiles.twitch} target="_blank" rel="noreferrer" aria-label="VexonCore on Twitch" className="transition-colors hover:text-white"><Twitch size={17} /></a>
+            <a href={`mailto:${contactEmail}`} aria-label="Email VexonStudio" className="transition-colors hover:text-white"><Mail size={17} /></a>
+            <a href={socialProfiles.discord} target="_blank" rel="noreferrer" aria-label="Vexon community Discord" className="transition-colors hover:text-white"><MessageSquare size={17} /></a>
           </div>
-          <div className="flex gap-4 text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">
+          <div className="flex gap-4 font-mono text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">
             <button onClick={() => navigateTo('/terms')} className="hover:text-red-400">Terms</button>
             <button onClick={() => navigateTo('/privacy')} className="hover:text-red-400">Privacy</button>
           </div>
+        </div>
+        <div className="container mx-auto mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-red-900/15 px-6 pt-5 font-mono text-[9px] uppercase tracking-[0.17em] text-gray-600">
+          <span>SYS.VER // v2.4.1-STABLE</span>
+          <span className="text-emerald-500/80">SECURE_ENCRYPTION_CHANNEL // HTTPS ACTIVE</span>
         </div>
       </footer>
     </div>

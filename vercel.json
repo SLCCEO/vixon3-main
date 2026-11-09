@@ -4,6 +4,12 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/neural-override", "destination": "/index.html" },
+    { "source": "/studio", "destination": "/index.html" },
+    { "source": "/live", "destination": "/index.html" },
+    { "source": "/dossier", "destination": "/index.html" },
+    { "source": "/stats", "destination": "/index.html" },
+    { "source": "/archives", "destination": "/index.html" },
+    { "source": "/contact", "destination": "/index.html" },
     { "source": "/terms", "destination": "/index.html" },
     { "source": "/privacy", "destination": "/index.html" },
     { "source": "/lore", "destination": "/index.html" },
@@ -12,5 +18,21 @@
     { "source": "/staff", "destination": "/index.html" },
     { "source": "/careers", "destination": "/index.html" },
     { "source": "/patreon", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static-cdn.jtvnw.net https://*.twitchcdn.net https://cdn.discordapp.com https://media.discordapp.net; connect-src 'self' https://generativelanguage.googleapis.com; frame-src https://player.twitch.tv https://www.twitch.tv; frame-ancestors 'none'; form-action 'self'; media-src 'self' blob:; upgrade-insecure-requests"
+        },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Strict-Transport-Security", "value": "max-age=31536000" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+      ]
+    }
   ]
 }
