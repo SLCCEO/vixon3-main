@@ -29,7 +29,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static-cdn.jtvnw.net https://*.twitchcdn.net https://cdn.discordapp.com https://media.discordapp.net; connect-src 'self' https://generativelanguage.googleapis.com wss://generativelanguage.googleapis.com; frame-src https://player.twitch.tv https://www.twitch.tv; frame-ancestors 'none'; form-action 'self'; media-src 'self' blob:; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://static-cdn.jtvnw.net https://*.twitchcdn.net https://cdn.discordapp.com https://media.discordapp.net; connect-src 'self' https://generativelanguage.googleapis.com wss://generativelanguage.googleapis.com; frame-src https://player.twitch.tv https://www.twitch.tv; frame-ancestors 'none'; form-action 'self'; media-src 'self' blob:; upgrade-insecure-requests"
         },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
