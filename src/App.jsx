@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import VexNodePage from './VexNodePage';
 import VideoEditorPage from './VideoEditorPage';
+import StaffLoginPage from './StaffLoginPage';
 import { 
   Twitter, 
   Twitch, 
@@ -408,13 +409,14 @@ const Navbar = ({ currentPath, onNavigate }) => {
     { name: 'Streamers', href: '/streamers' },
     { name: 'Partners', href: '/partnerships' },
     { name: 'Staff', href: '/staff' },
+    { name: 'Staff Portal', href: '/staff-login' },
     { name: 'Join Our Team', href: '/careers' },
     { name: 'Patreon', href: '/patreon' },
     { name: 'Archives', href: '/archives' },
     { name: 'Contact', href: '/contact' }
   ];
   const primaryNavLinks = navLinks.filter((link) => ['Home', 'Studio', 'Live', 'Dossier', 'Stats', 'Lore', 'Contact'].includes(link.name));
-  const networkLinks = navLinks.filter((link) => ['Streamers', 'Partners', 'Staff', 'Join Our Team', 'Patreon', 'Archives'].includes(link.name));
+  const networkLinks = navLinks.filter((link) => ['Streamers', 'Partners', 'Staff', 'Staff Portal', 'Join Our Team', 'Patreon', 'Archives'].includes(link.name));
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-[#0a0505]/95 backdrop-blur-md py-3 border-b border-red-600/30' : 'bg-transparent py-6'}`}>
@@ -1312,6 +1314,10 @@ export default function App() {
 
   if (currentPath === '/node') {
     return <VexNodePage />;
+  }
+
+  if (currentPath === '/staff-login') {
+    return <StaffLoginPage />;
   }
 
   if (currentPath === '/editor') {
