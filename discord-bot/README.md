@@ -13,6 +13,7 @@ Discord.js v14 bot and website API service. It keeps the bot token and Supabase 
 
 ```powershell
 npm install
+npm test
 npm run deploy
 npm start
 ```
@@ -39,7 +40,7 @@ Warning records exist in the bot's Supabase database; Discord has no native warn
 
 Apply both website migrations in `../supabase/migrations/` to the same Supabase project used by the bot. Set `MODERATION_CASE_CHANNEL_ID` to the forum channel ID containing the case files. The bot role must be able to view the forum, read its message history, and access its public threads. Enable the privileged Message Content intent in the Discord Developer Portal; the bot requests it when `MODERATION_CASE_CHANNEL_ID` is set. The current case forum is `1546716624558751876`.
 
-On startup and every six hours, the bot imports active and archived forum posts and the current server ban list. New posts are synced as they arrive, and Discord ban/unban gateway events update the archive immediately. Message text, case tags, and evidence metadata are stored in `moderation_cases`; attachments up to 25 MB are copied to the private `moderation-evidence` Supabase Storage bucket. Oversize or inaccessible evidence is reported in the bot logs and marked as unavailable rather than treated as archived. VEX-NODE access is restricted to the configured Discord staff/moderator role IDs.
+On startup and every six hours, the bot imports active and archived forum posts and the current server ban list. Active threads are fetched at guild scope and filtered to the configured case forum. New posts are synced as they arrive, and Discord ban/unban gateway events update the archive immediately. Message text, case tags, and evidence metadata are stored in `moderation_cases`; attachments up to 25 MB are copied to the private `moderation-evidence` Supabase Storage bucket. Oversize or inaccessible evidence is reported in the bot logs and marked as unavailable rather than treated as archived. VEX-NODE access is restricted to the configured Discord staff/moderator role IDs.
 
 The website's VEX-NODE “Sync Twitch bans” action imports the current Twitch channel bans and timeouts using the user OAuth token configured in Vercel. Authorize at `/api/twitch/login` with `moderation:read:banned_users`, save the returned access and refresh tokens in Vercel, and redeploy. The sync action needs a valid access token; reauthorize and update the Vercel token when Twitch expires it.
 

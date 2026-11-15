@@ -16,10 +16,12 @@ const fetchDiscord = async (client, route, query) => {
   return client.rest.get(route, options);
 };
 
-const getForumThreads = async (client, channelId) => {
+export const getForumThreads = async (client, channelId, guildId) => {
   const threadsById = new Map();
-  const active = await fetchDiscord(client, `/channels/${channelId}/threads/active`);
-  for (const thread of active.threads || []) threadsById.set(thread.id, thread);
+  const active = await fetchDiscord(client, `/guilds/${guildId}/threads/active`);
+  for (const thread of active.threads || []) {
+    if (thread.parent_id === channelId) threadsById.set(thread.id, thread);
+  }
 
   let before;
   let hasMore = false;
@@ -277,7 +279,7 @@ const syncForumCases = async (client) => {
     throw new TypeError('MODERATION_CASE_CHANNEL_ID must be a Discord forum channel.');
   }
 
-  const threads = await getForumThreads(client, channelId);
+  const threads = await getForumThreads(client, channelId, process.env.DISCORD_GUILD_ID);
   let failedEvidence = 0;
   const rows = [];
 
