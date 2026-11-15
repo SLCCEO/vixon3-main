@@ -6,7 +6,7 @@ Discord.js v14 bot and website API service. It keeps the bot token and Supabase 
 
 1. Create a Discord application and bot in the [Discord Developer Portal](https://discord.com/developers/applications).
 2. Invite the bot to the VEXON server with `bot` and `applications.commands` scopes and required permissions.
-3. Enable the Server Members and Server Members Presence intents in the bot settings.
+3. Enable the Server Members and Server Members Presence intents in the bot settings. When importing forum case files, also enable the Message Content intent.
 4. Copy `.env.example` to `.env` and fill in the values. Keep `DISCORD_BOT_TOKEN`, `BOT_API_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` private.
 5. Run the SQL in [`database/schema.sql`](./database/schema.sql) in the Supabase SQL Editor.
 6. Install dependencies and deploy commands:
@@ -34,6 +34,14 @@ The bot flags accounts younger than `MIN_ACCOUNT_AGE_DAYS` (default 7 days) and 
 Submitting `/duty loa` sends the request reason to the `VexonCore` and `Testing10325` users configured in `DISCORD_STAFF_IDS`. Those approvers can review it in the server with `/loa-approve user:<member>` or `/loa-reject user:<member>`; being a configured approver grants access to those two review commands. Make sure both users have valid Discord user IDs in that JSON object and allow DMs from the bot.
 
 Warning records exist in the bot's Supabase database; Discord has no native warning record to delete. `/warn-clear one` removes a warning by ID, while `/warn-clear all` clears a selected member's bot warning records. Successful removals are posted to `MODERATION_ALERT_CHANNEL_ID` when configured. The bot and its role need permission to view and send messages in that staff-only channel.
+
+## Moderation archive
+
+Apply both website migrations in `../supabase/migrations/` to the same Supabase project used by the bot. Set `MODERATION_CASE_CHANNEL_ID` to the forum channel ID containing the case files. The bot role must be able to view the forum, read its message history, and access its public threads. Enable the privileged Message Content intent in the Discord Developer Portal; the bot requests it when `MODERATION_CASE_CHANNEL_ID` is set. The current case forum is `1546716624558751876`.
+
+On startup and every six hours, the bot imports active and archived forum posts and the current server ban list. New posts are synced as they arrive, and Discord ban/unban gateway events update the archive immediately. Message text, case tags, and evidence metadata are stored in `moderation_cases`; attachments up to 25 MB are copied to the private `moderation-evidence` Supabase Storage bucket. Oversize or inaccessible evidence is reported in the bot logs and marked as unavailable rather than treated as archived. VEX-NODE access is restricted to the configured Discord staff/moderator role IDs.
+
+The website's VEX-NODE “Sync Twitch bans” action imports the current Twitch channel bans and timeouts using the user OAuth token configured in Vercel. Authorize at `/api/twitch/login` with `moderation:read:banned_users`, save the returned access and refresh tokens in Vercel, and redeploy. The sync action needs a valid access token; reauthorize and update the Vercel token when Twitch expires it.
 
 ## Commands
 

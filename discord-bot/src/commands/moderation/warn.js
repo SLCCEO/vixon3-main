@@ -1,6 +1,7 @@
 import { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { supabase } from '../../database/supabase.js';
 import { requirePermission, requireStaff } from '../../utils/staff.js';
+import { tryRecordModerationAction } from '../../utils/moderation-archive.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -25,6 +26,7 @@ export default {
       .select('id')
       .single();
     if (insertError) throw insertError;
+    const archived = await tryRecordModerationAction(interaction, { action: 'warning', user, reason });
 
     const { count, error: countError } = await supabase
       .from('warnings')
@@ -33,7 +35,7 @@ export default {
     if (countError) throw countError;
 
     await interaction.reply({
-      content: `Recorded warning #${warning.id} for <@${user.id}>. They now have **${count ?? 0}** warning${count === 1 ? '' : 's'}. Reason: ${reason}`,
+      content: `Recorded warning #${warning.id} for <@${user.id}>. They now have **${count ?? 0}** warning${count === 1 ? '' : 's'}. Reason: ${reason}${archived ? '' : '\nThe warning was saved, but its case archive write failed. Notify an administrator.'}`,
       allowedMentions: { parse: [] },
       flags: MessageFlags.Ephemeral
     });

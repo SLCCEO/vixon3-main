@@ -1,6 +1,7 @@
 import { EmbedBuilder, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { supabase } from '../../database/supabase.js';
 import { requirePermission, requireStaff } from '../../utils/staff.js';
+import { tryRecordModerationAction } from '../../utils/moderation-archive.js';
 
 async function postWarningAuditLog(interaction, { user, removedCount, warningId }) {
   const channelId = process.env.MODERATION_ALERT_CHANNEL_ID;
@@ -95,6 +96,12 @@ export default {
       return;
     }
 
+    const archived = await tryRecordModerationAction(interaction, {
+      action: 'warning_removed',
+      user,
+      reason: warningId ? `Removed warning #${warningId}` : `Cleared ${removedCount} warnings`,
+    });
+
     let auditResult;
     try {
       auditResult = await postWarningAuditLog(interaction, { user, removedCount, warningId });
@@ -110,7 +117,8 @@ export default {
           : `Removed **${removedCount}** warning${removedCount === 1 ? '' : 's'} for <@${user.id}> from the bot database.`,
         auditResult.posted
           ? 'The action was recorded in the moderation log.'
-          : `The database change succeeded, but no Discord audit log was posted: ${auditResult.reason}`
+          : `The database change succeeded, but no Discord audit log was posted: ${auditResult.reason}`,
+        archived ? '' : 'The warning change succeeded, but its Supabase case archive write failed. Notify an administrator.'
       ].join('\n'),
       allowedMentions: { parse: [] },
       flags: MessageFlags.Ephemeral

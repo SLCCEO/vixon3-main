@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import { syncModerationArchive } from '../utils/moderation-archive.js';
 
 export function startWebsiteApi(client, staffIds) {
   const app = express();
@@ -79,6 +80,15 @@ export function startWebsiteApi(client, staffIds) {
       .filter((presence) => presence.status !== 'offline')
       .size;
     response.json({ members: guild.memberCount, onlineMembers });
+  });
+
+  app.post('/api/moderation/sync', authorize, async (_request, response, next) => {
+    try {
+      const result = await syncModerationArchive(client);
+      response.json(result);
+    } catch (error) {
+      next(error);
+    }
   });
 
   app.use((error, _request, response, _next) => {

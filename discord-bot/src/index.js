@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadCommands } from './utils/load-commands.js';
 import { startWebsiteApi } from './api/server.js';
 import { getJoinMonitoringConfig } from './utils/join-monitor.js';
+import { startModerationArchiveSync } from './utils/moderation-archive.js';
 
 const required = [
   'DISCORD_BOT_TOKEN',
@@ -35,12 +36,17 @@ if (!staffIds || Array.isArray(staffIds) || typeof staffIds !== 'object') {
 }
 
 const rootDirectory = path.dirname(fileURLToPath(import.meta.url));
+const intents = [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMembers,
+  GatewayIntentBits.GuildPresences,
+  GatewayIntentBits.GuildModeration
+];
+if (process.env.MODERATION_CASE_CHANNEL_ID) {
+  intents.push(GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent);
+}
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildPresences
-  ]
+  intents
 });
 client.commands = new Collection();
 
@@ -68,6 +74,7 @@ for (const eventName of eventNames.filter((name) => name.endsWith('.js')).sort()
 const server = startWebsiteApi(client, staffIds);
 client.once('clientReady', () => {
   console.info(`Discord bot ready as ${client.user.tag}`);
+  startModerationArchiveSync(client);
 });
 
 try {

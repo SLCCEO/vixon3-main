@@ -1,5 +1,6 @@
 import { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { requirePermission } from '../../utils/staff.js';
+import { tryRecordModerationAction } from '../../utils/moderation-archive.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -25,8 +26,9 @@ export default {
     const reason = interaction.options.getString('reason')?.trim() || 'No reason provided';
     const member = await interaction.guild.members.fetch(user.id);
     await member.timeout(minutes * 60_000, `${reason} (by ${interaction.user.tag})`);
+    const archived = await tryRecordModerationAction(interaction, { action: 'timeout', user, reason });
     await interaction.reply({
-      content: `Timed out <@${user.id}> for ${minutes} minute${minutes === 1 ? '' : 's'}. Reason: ${reason}`,
+      content: `Timed out <@${user.id}> for ${minutes} minute${minutes === 1 ? '' : 's'}. Reason: ${reason}${archived ? '' : '\nThe timeout succeeded, but its case archive write failed. Notify an administrator.'}`,
       allowedMentions: { parse: [] },
       flags: MessageFlags.Ephemeral
     });

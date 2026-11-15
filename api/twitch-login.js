@@ -12,7 +12,7 @@ export default function handler(request, response) {
     client_id: process.env.TWITCH_CLIENT_ID,
     redirect_uri: 'https://www.vixon.online/api/twitch-callback',
     response_type: 'code',
-    scope: 'moderator:read:followers',
+    scope: 'moderator:read:followers moderation:read:banned_users',
   });
 
   return response.redirect(`https://id.twitch.tv/oauth2/authorize?${params}`);

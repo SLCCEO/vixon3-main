@@ -47,7 +47,7 @@ TWITCH_REFRESH_TOKEN=your-broadcaster-refresh-token
 To authorize the Twitch follower token, register `https://www.vixon.online/api/twitch-callback` as the OAuth redirect URL, then open `https://www.vixon.online/api/twitch-login`.
 ```
 
-The Twitch client secret, access token, and refresh token must never use a `VITE_` prefix because they must not be sent to the browser. Create both tokens by authorizing the Vexon Twitch account with the `moderator:read:followers` scope. The endpoint uses the app token for profiles and refreshes the broadcaster user token before reading follower totals. Without the user token or required scope, profiles still load but follower totals show `Followers unavailable`.
+The Twitch client secret, access token, and refresh token must never use a `VITE_` prefix because they must not be sent to the browser. Authorize the Vexon Twitch account through `/api/twitch-login` and save the returned tokens server-side. The login requests `moderator:read:followers` and `moderation:read:banned_users`; reauthorize after deploying this scope change before using the VEX-NODE Twitch ban sync. The website uses the follower scope for stream statistics and the banned-users scope to read the broadcaster's current ban/timeout list.
 
 Homepage social statistics
 
@@ -64,6 +64,47 @@ DISCORD_SERVICE_API_KEY=the-same-value-as-the-bot-BOT_API_KEY
 ```
 
 Enable the YouTube Data API v3 for the Google key. Authorize the TikTok account through Login Kit with both `user.info.basic` and `user.info.stats`; the latter provides follower, following, likes, and video counts. The token must belong to the account whose follower count should be displayed. The separate Discord bot project lives in `discord-bot/`; deploy it as a long-running Node service, then set `DISCORD_SERVICE_URL` and `DISCORD_SERVICE_API_KEY` in Vercel. Missing or unauthorized services return `null` for that card while the other counts continue loading.
+
+Supabase keep-alive
+
+The protected `/api/health` endpoint upserts the website's last activity timestamp into `public.system_heartbeat`. Apply `supabase/migrations/20261115000000_system_heartbeat.sql` to the Supabase project before enabling the scheduled workflow. Configure these Vercel environment variables:
+
+```text
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-server-side-service-role-key
+CRON_SECRET=a-long-random-secret
+```
+
+Keep both keys server-side; never expose them through `VITE_` variables. Add `SITE_URL` (the deployed origin, without a trailing slash) and the same `CRON_SECRET` as GitHub Actions repository secrets. `.github/workflows/supabase-heartbeat.yml` runs every three days and can also be started manually from the Actions tab. The endpoint only accepts authenticated GET requests and updates one row; unauthenticated requests are rejected. The Supabase REST API is used for this small upsert, so it does not open direct PostgreSQL connections or require separate PgBouncer configuration.
+
+VEX-NODE staff dashboard
+
+The private `/node` dashboard signs staff in through Discord OAuth. In the Discord Developer Portal, register the callback URL shown by `VEX_NODE_DISCORD_REDIRECT_URI` and enable the `identify` and `guilds.members.read` scopes. Configure these server-side Vercel variables:
+
+```text
+VEX_NODE_DISCORD_CLIENT_ID=your-discord-application-id
+VEX_NODE_DISCORD_CLIENT_SECRET=your-discord-application-secret
+VEX_NODE_DISCORD_REDIRECT_URI=https://www.vixon.online/api/vex-node/callback
+VEX_NODE_ALLOWED_ROLE_IDS=staff-role-id,moderator-role-id,admin-role-id
+VEX_NODE_EDITOR_ROLE_IDS=video-editor-role-id
+VEX_NODE_PLANNER_USER_IDS=manager-discord-user-id,owner-discord-user-id
+VEX_NODE_TECH_OPS_USER_IDS=owner-discord-user-id
+VEX_NODE_SESSION_SECRET=at-least-32-random-bytes
+DISCORD_GUILD_ID=your-discord-server-id
+VEX_NODE_TWITCH_BROADCASTER_LOGIN=vexoncore
+TWITCH_CLIENT_ID=your-twitch-client-id
+TWITCH_ACCESS_TOKEN=your-broadcaster-user-access-token
+TWITCH_REFRESH_TOKEN=your-broadcaster-user-refresh-token
+GEMINI_API_KEY=your-google-ai-studio-api-key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-server-side-service-role-key
+```
+
+Use Discord role IDs (not names) in `VEX_NODE_ALLOWED_ROLE_IDS`; include the staff, moderator, and administrator roles that should enter VEX-NODE. Generate `VEX_NODE_SESSION_SECRET` with a cryptographically secure random generator (for example, `openssl rand -base64 32`). The session is encrypted, HttpOnly, short-lived, and the member role is checked with Discord on every dashboard request. The Supabase service-role key remains server-side. Apply all migrations in `supabase/migrations/`, including the heartbeat, moderation archive, and studio tasks migrations. The bot reads the forum channel configured by `MODERATION_CASE_CHANNEL_ID`, imports active and archived case threads and copies attachments up to 25 MB into the private `moderation-evidence` bucket. It also snapshots current Discord bans every six hours, updates those records on ban/unban events, and archives actions executed with its ban, kick, timeout, untimeout, warn, and warn-clear commands. New or updated forum posts are synced when messages arrive. VEX-NODE searches the full imported archive with pagination; the “Sync Twitch bans” action reads the current list for `VEX_NODE_TWITCH_BROADCASTER_LOGIN` (defaults to `vexoncore`) and stores it in the same archive. Authorize Twitch at `/api/twitch/login` with `moderation:read:banned_users`, then save both returned token values in Vercel and redeploy. The ban-sync action requires a valid user access token; reauthorize and update the token when Twitch expires it.
+
+Set `VEX_NODE_EDITOR_ROLE_IDS` to the Discord role ID(s) permitted to use the standalone `/editor` workspace. Editor-only accounts can sign in and see only the editor launch panel in VEX-NODE; the rest of the control dashboard still requires a role in `VEX_NODE_ALLOWED_ROLE_IDS`. The editor checks Discord membership on both its access endpoint and the dashboard link. Keep `VEX_NODE_EDITOR_ROLE_IDS` separate from the staff allowlist unless editors should also access staff modules.
+
+Planner and Tech Ops now have a client UI and protected Vercel API routes, but need a valid `GEMINI_API_KEY`, per-assistant Discord user-ID allowlists, and the `20261115004000_studio_tasks.sql` migration before use. Set `VEX_NODE_PLANNER_USER_IDS` to the manager and owner IDs, and `VEX_NODE_TECH_OPS_USER_IDS` to the owner ID; each authorized account gets its own independent session. The implementation uses Google’s official `@google/genai` Live API because its documented client supports constrained ephemeral tokens and bidirectional audio; the confirmed model ID is `gemini-3.8-live`. Token creation and every tool request re-check the VEX-NODE Discord role and assistant-specific account allowlist. Planner can list/create Supabase studio tasks; Tech Ops can read the Supabase heartbeat. The browser requests microphone access only after the user starts a session, streams 16 kHz PCM, plays 24 kHz PCM, renders transcripts, and ends after 45 seconds without voice activity. The exact `google/gemini-3.8-live` Gateway identifier is not used. ShiftStream now has a standalone Next.js app with invite-only Supabase email login, Twitch and Google OAuth, encrypted provider tokens, and manual schedule-to-calendar sync. Its Supabase migration and OAuth/environment configuration must be applied before managers can connect accounts; see `shiftstream/README.md`. The standalone `/editor` workspace uses ffmpeg.wasm for two composited video tracks and an audio track, with video/audio trimming, draggable clip repositioning, track selection, and clip deletion (including Delete/Backspace). It imports PNG, JPEG, and WebP stills as image overlays with editable duration, scale, and position, alongside video and audio media. MP4 rendering and download happen client-side. Media stays in the browser; editor files are limited to 1 GB each / 1 GB total and the timeline to 20 minutes. These are browser-memory limits, not a guarantee that every device can render a project at the maximum size. The production dashboard needs `VITE_SHIFTSTREAM_URL` set to the deployed ShiftStream URL before its launch link appears. Live event streams and local host/firewall metrics remain unavailable until their sources are connected.
 
 Terms of Service (TOS)
 

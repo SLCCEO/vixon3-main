@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import VexNodePage from './VexNodePage';
+import VideoEditorPage from './VideoEditorPage';
 import { 
   Twitter, 
   Twitch, 
@@ -1307,6 +1309,14 @@ export default function App() {
     setMessages(prev => [...prev, { role: 'assistant', text: response }]);
     setIsTyping(false);
   };
+
+  if (currentPath === '/node') {
+    return <VexNodePage />;
+  }
+
+  if (currentPath === '/editor') {
+    return <VideoEditorPage />;
+  }
 
   if (currentPath === '/neural-override') {
     return (

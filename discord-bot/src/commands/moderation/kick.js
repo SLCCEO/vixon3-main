@@ -1,5 +1,6 @@
 import { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { requirePermission } from '../../utils/staff.js';
+import { tryRecordModerationAction } from '../../utils/moderation-archive.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -17,8 +18,9 @@ export default {
     const reason = interaction.options.getString('reason')?.trim() || 'No reason provided';
     const member = await interaction.guild.members.fetch(user.id);
     await member.kick(`${reason} (by ${interaction.user.tag})`);
+    const archived = await tryRecordModerationAction(interaction, { action: 'kick', user, reason });
     await interaction.reply({
-      content: `Kicked <@${user.id}>. Reason: ${reason}`,
+      content: `Kicked <@${user.id}>. Reason: ${reason}${archived ? '' : '\nThe kick succeeded, but its case archive write failed. Notify an administrator.'}`,
       allowedMentions: { parse: [] },
       flags: MessageFlags.Ephemeral
     });
