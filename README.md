@@ -79,7 +79,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-server-side-service-role-key
 CRON_SECRET=a-long-random-secret
 ```
 
-Keep both keys server-side; never expose them through `VITE_` variables. Add `SITE_URL` (the deployed origin, without a trailing slash) and the same `CRON_SECRET` as secrets in the GitHub Actions `Production` environment. `.github/workflows/supabase-heartbeat.yml` runs every three days and can also be started manually from the Actions tab. The endpoint only accepts authenticated GET requests and updates one row; unauthenticated requests are rejected. The Supabase REST API is used for this small upsert, so it does not open direct PostgreSQL connections or require separate PgBouncer configuration.
+Keep both keys server-side; never expose them through `VITE_` variables. Add `SITE_URL` (the deployed origin, without a trailing slash) and the same `CRON_SECRET` as GitHub Actions repository secrets. `.github/workflows/supabase-heartbeat.yml` runs every three days and can also be started manually from the Actions tab. The endpoint only accepts authenticated GET requests and updates one row; unauthenticated requests are rejected. The Supabase REST API is used for this small upsert, so it does not open direct PostgreSQL connections or require separate PgBouncer configuration.
 
 VEX-NODE staff dashboard
 

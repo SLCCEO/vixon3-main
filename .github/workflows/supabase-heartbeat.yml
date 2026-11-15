@@ -11,7 +11,6 @@ permissions:
 jobs:
   heartbeat:
     runs-on: ubuntu-latest
-    environment: Production
     steps:
       - name: Ping protected health endpoint
         env:
@@ -19,7 +18,7 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           if [ -z "$SITE_URL" ] || [ -z "$CRON_SECRET" ]; then
-            echo "SITE_URL and CRON_SECRET secrets are required in the GitHub Production environment." >&2
+            echo "SITE_URL and CRON_SECRET repository secrets are required." >&2
             exit 1
           fi
           curl --fail-with-body --silent --show-error --retry 3 --retry-all-errors \
