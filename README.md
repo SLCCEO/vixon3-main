@@ -65,6 +65,10 @@ DISCORD_SERVICE_API_KEY=the-same-value-as-the-bot-BOT_API_KEY
 
 Enable the YouTube Data API v3 for the Google key. Authorize the TikTok account through Login Kit with both `user.info.basic` and `user.info.stats`; the latter provides follower, following, likes, and video counts. The token must belong to the account whose follower count should be displayed. The separate Discord bot project lives in `discord-bot/`; deploy it as a long-running Node service, then set `DISCORD_SERVICE_URL` and `DISCORD_SERVICE_API_KEY` in Vercel. Missing or unauthorized services return `null` for that card while the other counts continue loading.
 
+Vercel Hobby function routing
+
+The website's API endpoints are dispatched through one catch-all Vercel function to stay within the Hobby plan function limit. Their implementations live in `api-handlers/`; when adding an endpoint, add its handler to `api-handlers/router.js` rather than creating another JavaScript file under `api/`.
+
 Supabase keep-alive
 
 The protected `/api/health` endpoint upserts the website's last activity timestamp into `public.system_heartbeat`. Apply `supabase/migrations/20261115000000_system_heartbeat.sql` to the Supabase project before enabling the scheduled workflow. Configure these Vercel environment variables:
