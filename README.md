@@ -67,7 +67,7 @@ Enable the YouTube Data API v3 for the Google key. Authorize the TikTok account 
 
 Vercel Hobby function routing
 
-The website's API endpoints are dispatched through one catch-all Vercel function to stay within the Hobby plan function limit. Their implementations live in `api-handlers/`; when adding an endpoint, add its handler to `api-handlers/router.js` rather than creating another JavaScript file under `api/`.
+The website's API endpoints are dispatched through one shared Vercel function and an `/api/:route*` rewrite to stay within the Hobby plan function limit. Their implementations live in `api-handlers/`; when adding an endpoint, add its handler to `api-handlers/router.js` rather than creating another JavaScript file under `api/`.
 
 Supabase keep-alive
 

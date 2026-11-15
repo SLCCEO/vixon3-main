@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { getApiHandler, getApiRoutes, normalizeApiRoute } from '../api-handlers/router.js';
-import apiRouter from '../api/[...route].js';
+import apiRouter from '../api/router.js';
 
 const expectedRoutes = [
   'discord-staff',

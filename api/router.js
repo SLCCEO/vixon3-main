@@ -1,11 +1,7 @@
 import { getApiHandler, normalizeApiRoute } from '../api-handlers/router.js';
 
 export default async function handler(request, response) {
-  const routeParameter = request.query?.route;
-  const requestPath = new URL(request.url || '/', 'http://vercel.local').pathname;
-  const route = normalizeApiRoute(
-    routeParameter ?? requestPath.replace(/^\/api\/?/, ''),
-  );
+  const route = normalizeApiRoute(request.query?.route);
   const apiHandler = getApiHandler(route);
 
   if (!apiHandler) {

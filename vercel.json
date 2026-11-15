@@ -3,6 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/api/:route*", "destination": "/api/router?route=:route*" },
     { "source": "/staff-login", "destination": "/index.html" },
     { "source": "/neural-override", "destination": "/index.html" },
     { "source": "/node", "destination": "/index.html" },
