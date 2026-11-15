@@ -23,6 +23,15 @@ const formatTimestamp = (value) => {
   return Number.isNaN(date.getTime()) ? 'Timestamp unavailable' : date.toLocaleString();
 };
 
+const formatGib = (bytes) => `${(Number(bytes) / (1024 ** 3)).toFixed(1)} GB`;
+
+const formatUptime = (seconds) => {
+  const totalHours = Math.floor(Number(seconds) / 3600);
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+  return days ? `${days}d ${hours}h` : `${hours}h`;
+};
+
 const heartbeatStyles = {
   healthy: { label: 'Healthy', className: 'text-emerald-400' },
   stale: { label: 'Stale', className: 'text-amber-400' },
@@ -230,6 +239,17 @@ export default function VexNodePage() {
   const heartbeatStyle = heartbeatStyles[heartbeat.status] || heartbeatStyles.unknown;
   const moderationCases = dashboard.moderationCases || [];
   const realtimeAssistants = dashboard.modules?.realtimeAssistants || {};
+  const hostTelemetry = Array.isArray(dashboard.hostTelemetry) ? dashboard.hostTelemetry : [];
+  const hostTelemetryStatus = dashboard.modules?.hostTelemetryStatus || 'restricted';
+  const hostTelemetrySummary = !realtimeAssistants.tech_ops
+    ? { label: 'Restricted', className: 'text-gray-500' }
+    : hostTelemetryStatus === 'connected'
+      ? { label: `${hostTelemetry.length} reporting`, className: 'text-emerald-400' }
+      : hostTelemetryStatus === 'not_configured'
+        ? { label: 'Setup required', className: 'text-amber-400' }
+        : hostTelemetryStatus === 'unavailable'
+          ? { label: 'Unavailable', className: 'text-amber-400' }
+          : { label: 'Awaiting agent', className: 'text-gray-400' };
   const availableAssistantCount = Number(realtimeAssistants.planner) + Number(realtimeAssistants.tech_ops);
   const currentHour = new Date().getHours();
   const recentArchiveCases = moderationCases.slice(0, 5);
@@ -338,8 +358,8 @@ export default function VexNodePage() {
               <span className="text-[8px] font-black uppercase tracking-[0.18em] text-gray-500">Host telemetry</span>
               <Activity size={14} className="text-gray-500" />
             </div>
-            <div className="text-xl font-semibold text-gray-400">Unavailable</div>
-            <div className="mt-3 border-t border-white/10 pt-2 text-[8px] text-gray-600">CPU / MEMORY METRICS NOT EXPOSED</div>
+            <div className={`text-xl font-semibold ${hostTelemetrySummary.className}`}>{hostTelemetrySummary.label}</div>
+            <div className="mt-3 border-t border-white/10 pt-2 text-[8px] text-gray-600">AUTHORIZED HOST AGENTS · CPU / MEMORY / UPTIME</div>
           </article>
         </section>
 
@@ -397,10 +417,28 @@ export default function VexNodePage() {
               <span className="text-gray-300">Moderation archive</span><span className={archiveStatus === 'Connected' ? 'text-emerald-400' : 'text-amber-400'}>{archiveStatus}</span>
               <span className="mt-1 text-[8px] text-gray-600">Discord cases and ban snapshots</span><span />
             </div>
-            <div className="grid grid-cols-[1fr_auto] gap-x-4 py-3 text-[9px]">
-              <span className="text-gray-300">Local host / firewall</span><span className="text-gray-500">Not connected</span>
-              <span className="mt-1 text-[8px] text-gray-600">No on-premises telemetry agent configured</span><span />
+            <div className="grid grid-cols-[1fr_auto] gap-x-4 border-b border-white/5 py-3 text-[9px]">
+              <span className="text-gray-300">On-prem host agents</span><span className={hostTelemetrySummary.className}>{hostTelemetrySummary.label}</span>
+              <span className="mt-1 text-[8px] text-gray-600">CPU, memory, uptime, and last report</span><span />
             </div>
+            {realtimeAssistants.tech_ops && hostTelemetry.map((host) => {
+              const memoryUsed = host.memory_total_bytes - host.memory_available_bytes;
+              const memoryPercent = (memoryUsed / host.memory_total_bytes) * 100;
+              return (
+                <div key={host.host_id} className="border-b border-white/5 py-3 text-[8px]">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="truncate font-bold text-gray-200">{host.host_name}</span>
+                    <span className="shrink-0 text-gray-500">{host.platform}</span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-gray-400">
+                    <span>CPU {Number(host.cpu_percent).toFixed(1)}%</span>
+                    <span>RAM {formatGib(memoryUsed)} / {formatGib(host.memory_total_bytes)} ({memoryPercent.toFixed(0)}%)</span>
+                    <span>Uptime {formatUptime(host.uptime_seconds)}</span>
+                  </div>
+                  <div className="mt-1 text-gray-600">LAST REPORT · {formatTimestamp(host.last_seen_at)}</div>
+                </div>
+              );
+            })}
           </article>
           <article className="border border-white/10 bg-[#101014]/90 p-4 sm:p-5">
             <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">

@@ -6,6 +6,7 @@ import apiRouter from '../api/router.js';
 const expectedRoutes = [
   'discord-staff',
   'health',
+  'host-telemetry',
   'patreon',
   'social-stats',
   'twitch',

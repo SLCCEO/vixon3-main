@@ -1,5 +1,6 @@
 import discordStaff from './discord-staff.js';
 import health from './health.js';
+import hostTelemetry from './host-telemetry.js';
 import patreon from './patreon.js';
 import socialStats from './social-stats.js';
 import twitch from './twitch.js';
@@ -20,6 +21,7 @@ import vexNodeTwitchSync from './vex-node/twitch-sync.js';
 const apiHandlers = new Map([
   ['discord-staff', discordStaff],
   ['health', health],
+  ['host-telemetry', hostTelemetry],
   ['patreon', patreon],
   ['social-stats', socialStats],
   ['twitch', twitch],

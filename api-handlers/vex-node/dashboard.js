@@ -88,6 +88,43 @@ export default async function handler(request, response) {
     const hasMoreCases = moderationCases.length > 100;
     if (hasMoreCases) moderationCases.pop();
     const realtimeAccess = getRealtimeUserAccess(access.session.userId);
+    let hostTelemetry = null;
+    let hostTelemetryStatus = realtimeAccess.tech_ops.allowed ? 'waiting_for_agent' : 'restricted';
+
+    if (realtimeAccess.tech_ops.allowed) {
+      try {
+        const hostTelemetryUrl = new URL('/rest/v1/host_telemetry', SUPABASE_URL);
+        hostTelemetryUrl.search = new URLSearchParams({
+          select: 'host_id,host_name,platform,cpu_percent,memory_total_bytes,memory_available_bytes,uptime_seconds,last_seen_at',
+          order: 'last_seen_at.desc',
+          limit: '20',
+        }).toString();
+        const hostTelemetryResponse = await fetch(hostTelemetryUrl, {
+          headers: {
+            apikey: SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+          signal: AbortSignal.timeout(5000),
+        });
+
+        if (hostTelemetryResponse.ok) {
+          const rows = await hostTelemetryResponse.json();
+          if (Array.isArray(rows)) {
+            hostTelemetry = rows;
+            hostTelemetryStatus = rows.length ? 'connected' : 'waiting_for_agent';
+          } else {
+            console.error('VEX-NODE host telemetry response was invalid.');
+            hostTelemetryStatus = 'unavailable';
+          }
+        } else {
+          console.error('VEX-NODE host telemetry read failed:', hostTelemetryResponse.status);
+          hostTelemetryStatus = hostTelemetryResponse.status === 404 ? 'not_configured' : 'unavailable';
+        }
+      } catch (error) {
+        console.error('VEX-NODE host telemetry request failed:', error);
+        hostTelemetryStatus = 'unavailable';
+      }
+    }
 
     return response.status(200).json({
       user: {
@@ -99,6 +136,7 @@ export default async function handler(request, response) {
         status: heartbeatStatus,
         lastSeenAt: heartbeat?.last_seen_at || null,
       },
+      hostTelemetry,
       moderationCases,
       hasMoreCases,
       modules: {
@@ -106,6 +144,7 @@ export default async function handler(request, response) {
         studioManagement: 'not_configured',
         moderationArchive: 'connected',
         geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
+        hostTelemetryStatus,
         realtimeAssistants: {
           planner: realtimeAccess.planner.allowed,
           tech_ops: realtimeAccess.tech_ops.allowed,

@@ -53,7 +53,19 @@ const getSystemHealth = async (supabase) => {
       : Date.now() - lastSeenTime <= 6 * 24 * 60 * 60 * 1000
         ? 'healthy'
         : 'stale';
-  return { status, lastSeenAt, hostMetrics: 'not_exposed_by_serverless_runtime' };
+
+  const hostUrl = new URL('/rest/v1/host_telemetry', supabase.url);
+  hostUrl.search = new URLSearchParams({
+    select: 'host_id,host_name,platform,cpu_percent,memory_total_bytes,memory_available_bytes,uptime_seconds,last_seen_at',
+    order: 'last_seen_at.desc',
+    limit: '20',
+  }).toString();
+  const hostResponse = await supabaseRequest(hostUrl, supabase.key);
+  if (!hostResponse.ok) throw new Error(`Host telemetry lookup failed: ${hostResponse.status}`);
+  const hosts = await hostResponse.json();
+  if (!Array.isArray(hosts)) throw new TypeError('Host telemetry response was invalid.');
+
+  return { status, lastSeenAt, hosts };
 };
 
 const listStudioTasks = async (supabase) => {
