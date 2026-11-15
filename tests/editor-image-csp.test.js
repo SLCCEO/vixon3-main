@@ -12,3 +12,7 @@ const contentSecurityPolicy = config.headers
 test('Content Security Policy allows local blob images in the editor', () => {
   assert.match(contentSecurityPolicy || '', /img-src[^;]*\bblob:/);
 });
+
+test('Content Security Policy allows the editor to compile WebAssembly', () => {
+  assert.match(contentSecurityPolicy || '', /script-src[^;]*'wasm-unsafe-eval'/);
+});

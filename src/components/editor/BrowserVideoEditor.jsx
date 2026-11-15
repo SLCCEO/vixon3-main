@@ -246,17 +246,14 @@ export default function BrowserVideoEditor() {
       ffmpegRef.current = null;
     }
     setStatus('Loading the local video engine…');
-    const [{ FFmpeg }, { toBlobURL }] = await Promise.all([
-      import('@ffmpeg/ffmpeg'),
-      import('@ffmpeg/util'),
-    ]);
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
     const ffmpeg = new FFmpeg();
     ffmpeg.on('progress', ({ progress: current }) => {
       setProgress(Math.max(0, Math.min(100, Math.round(current * 100))));
     });
     await ffmpeg.load({
-      coreURL: await toBlobURL('/ffmpeg/ffmpeg-core.js', 'text/javascript'),
-      wasmURL: await toBlobURL('/ffmpeg/ffmpeg-core.wasm', 'application/wasm'),
+      coreURL: '/ffmpeg/ffmpeg-core.js',
+      wasmURL: '/ffmpeg/ffmpeg-core.wasm',
     });
     ffmpegRef.current = ffmpeg;
     return ffmpeg;
